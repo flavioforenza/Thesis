@@ -8,6 +8,12 @@ import torch
 import torch.nn as nn
 from scipy.io import loadmat
 import csv
+
+# Show library
+# import matplotlib
+# matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+
 # Our libs
 from mit_semseg.dataset import TestDataset
 from mit_semseg.models import ModelBuilder, SegmentationModule
@@ -48,8 +54,15 @@ def visualize_result(data, pred, cfg):
     im_vis = np.concatenate((img, pred_color), axis=1)
 
     img_name = info.split('/')[-1]
+    img_name_final = img_name.replace('.jpg', '.png')
     Image.fromarray(im_vis).save(
-        os.path.join(cfg.TEST.result, img_name.replace('.jpg', '.png')))
+        os.path.join(cfg.TEST.result, img_name_final))
+
+    im = Image.open(open(os.path.join(cfg.TEST.result, img_name_final), 'rb'))
+    im.show()
+    # plt.figure()
+    # plt.imshow(os.path.join(cfg.TEST.result, img_name_final))
+    # plt.show()  # display it
 
 
 def test(segmentation_module, loader, gpu):
