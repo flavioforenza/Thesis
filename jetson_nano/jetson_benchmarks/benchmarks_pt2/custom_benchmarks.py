@@ -37,7 +37,7 @@ networks_detectNet = [
 	"multiped"
 ]
 
-input_list = ["road.mp4", "csi://0", "/dev/video1"]
+input_list = ["road.mp4", "csi://0", "/dev/video1", "images/*.jpg"]
 output_list = ["display://0", "rtp://192.168.1.53:5005"]
 
 for single_input in input_list:
@@ -57,7 +57,7 @@ for single_input in input_list:
 		parser.add_argument("--network", type=str, default="", help="pre-trained model to load (see below for options)")
 		parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
 		parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
-		parser.add_argument("--input-codec", type=str, default="h264", help="type of output-codec") 
+		parser.add_argument("--input-codec", type=str, default="", help="type of output-codec") 
 
 		is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
@@ -121,8 +121,9 @@ for single_input in input_list:
 				"display://0": "display",
 				"/dev/video1": "video1 streaming",
 				"csi://0": "video0 streaming",
+				"images/*.jpg":"images"
 			}
-			return switcher.get(method, lambda: 'Invalid tokenizer')
+			return switcher.get(method, lambda: 'Invalid source')
 
 		input_name = save_Dataframe(single_input)
 		output_name = save_Dataframe(single_output)
