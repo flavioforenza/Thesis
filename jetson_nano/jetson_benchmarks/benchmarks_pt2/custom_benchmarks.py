@@ -77,7 +77,7 @@ for single_input in input_list:
 			output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
 			# create video sources
 			input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
-			timeuout = time.time() + 5
+			timeuout = time.time() + 10
 			lst_frames_input = []
 			lst_frames_output = []
 			lst_frames_network = []
@@ -107,10 +107,7 @@ for single_input in input_list:
 
 				# print out performance info
 				net.PrintProfilerTimes()
-
-				# exit on input/output EOS
-				if not input.IsStreaming() or not output.IsStreaming():
-					break
+				
 			dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Input")] = max(lst_frames_input)
 			dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Output")] = max(lst_frames_output)
 			dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Network")] = max(lst_frames_network)
