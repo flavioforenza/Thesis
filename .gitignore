@@ -7,4 +7,6 @@ ckpt/*
 *.prototxt
 *.onnx
 *.uff
-data/*
+**data/
+**networks/
+*.caffemodel
