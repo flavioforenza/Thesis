@@ -31,7 +31,7 @@ import os
 
 def save_Dataframe(method):
 	switcher ={
-		"video/240p_30fps.mp4": "video 240p_30fps",
+		"video/240p_60fps.mp4": "video 240p_60fps",
 		"video/360p_30fps.mp4": "video 360p_30fps",
 		"video/480p_30fps.mp4": "video 480p_30fps",
 		"video/720p_30fps.mp4": "video 720p_30fps",
@@ -139,7 +139,7 @@ networks_segNet = [
 ]
 
 input_list = [
-	"video/240p_30fps.mp4",
+	"video/240p_60fps.mp4",
 	"video/360p_30fps.mp4",
 	"video/480p_30fps.mp4",
 	"video/720p_30fps.mp4",

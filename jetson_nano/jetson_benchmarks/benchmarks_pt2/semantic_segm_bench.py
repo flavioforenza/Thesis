@@ -26,85 +26,162 @@ import jetson.utils
 
 import argparse
 import sys
-
+import time
+import pandas as pd
+import os
 from segnet_utils import *
 
-# parse the command line
-parser = argparse.ArgumentParser(description="Segment a live camera stream using an semantic segmentation DNN.", 
-                                 formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.segNet.Usage() +
-                                 jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
+def save_Dataframe(method):
+	switcher ={
+		"video/240p_60fps.mp4": "video 240p_60fps",
+		"video/360p_30fps.mp4": "video 360p_30fps",
+		"video/480p_30fps.mp4": "video 480p_30fps",
+		"video/720p_30fps.mp4": "video 720p_30fps",
+		"video/1080p_30fps.mp4": "video 1080p_30fps",
+		"video/1080p_60fps.mp4": "video 1080p_60fps",
+		"rtp://192.168.1.52:5005": "SSH streaming",
+		"display://0": "display",
+		"/dev/video1": "video1 streaming",
+		"csi://0": "video0 streaming",
+		"images/*.jpg":"images"
+	}
+	return switcher.get(method, lambda: 'Invalid source')
 
-parser.add_argument("input_URI", type=str, default="", nargs='?', help="URI of the input stream")
-parser.add_argument("output_URI", type=str, default="", nargs='?', help="URI of the output stream")
-parser.add_argument("--network", type=str, default="fcn-resnet18-voc", help="pre-trained model to load, see below for options")
-parser.add_argument("--filter-mode", type=str, default="linear", choices=["point", "linear"], help="filtering mode used during visualization, options are:\n  'point' or 'linear' (default: 'linear')")
-parser.add_argument("--visualize", type=str, default="overlay,mask", help="Visualization options (can be 'overlay' 'mask' 'overlay,mask'")
-parser.add_argument("--ignore-class", type=str, default="void", help="optional name of class to ignore in the visualization results (default: 'void')")
-parser.add_argument("--alpha", type=float, default=150.0, help="alpha blending value to use during overlay, between 0.0 and 255.0 (default: 150.0)")
-parser.add_argument("--stats", action="store_true", help="compute statistics about segmentation mask class output")
+def get_fps(input_list, output_list, networks, operation):
+	for single_input in input_list:
+		for single_output in output_list:
+			os.environ["DISPLAY"] = ':0'
 
-is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
+			# parse the command line
+			# parse the command line
+			parser = argparse.ArgumentParser(description="Segment a live camera stream using an semantic segmentation DNN.", 
+											formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.segNet.Usage() +
+											jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
 
-try:
-	opt = parser.parse_known_args()[0]
-except:
-	print("")
-	parser.print_help()
-	sys.exit(0)
+			parser.add_argument("input_URI", type=str, default=single_input, nargs='?', help="URI of the input stream")
+			parser.add_argument("output_URI", type=str, default=single_output, nargs='?', help="URI of the output stream")
+			parser.add_argument("--network", type=str, default="", help="pre-trained model to load, see below for options")
+			parser.add_argument("--filter-mode", type=str, default="linear", choices=["point", "linear"], help="filtering mode used during visualization, options are:\n  'point' or 'linear' (default: 'linear')")
+			parser.add_argument("--visualize", type=str, default="overlay,mask", help="Visualization options (can be 'overlay' 'mask' 'overlay,mask'")
+			parser.add_argument("--ignore-class", type=str, default="void", help="optional name of class to ignore in the visualization results (default: 'void')")
+			parser.add_argument("--alpha", type=float, default=150.0, help="alpha blending value to use during overlay, between 0.0 and 255.0 (default: 150.0)")
+			parser.add_argument("--stats", action="store_true", help="compute statistics about segmentation mask class output")
 
-# load the segmentation network
-net = jetson.inference.segNet(opt.network, sys.argv)
+			is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
-# set the alpha blending value
-net.SetOverlayAlpha(opt.alpha)
+			try:
+				opt = parser.parse_known_args()[0]
+			except:
+				print("")
+				parser.print_help()
+				sys.exit(0)
 
-# create video output
-output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
+			dataframe = pd.DataFrame(columns=["Input", "Output", "Network"], index=networks)
 
-# create buffer manager
-buffers = segmentationBuffers(net, opt)
+			for network in networks:
+				# load the segmentation network
+				net = jetson.inference.segNet(opt.network, sys.argv)
 
-# create video source
-input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
+				# set the alpha blending value
+				net.SetOverlayAlpha(opt.alpha)
 
-# process frames until user exits
-while True:
-	# capture the next image
-	img_input = input.Capture()
+				# create video output
+				output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
 
-	# allocate buffers for this size image
-	buffers.Alloc(img_input.shape, img_input.format)
+				# create buffer manager
+				buffers = segmentationBuffers(net, opt)
 
-	# process the segmentation network
-	net.Process(img_input, ignore_class=opt.ignore_class)
+				# create video source
+				input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
 
-	# generate the overlay
-	if buffers.overlay:
-		net.Overlay(buffers.overlay, filter_mode=opt.filter_mode)
+				timeuout = time.time() + 10
+				lst_frames_input = []
+				lst_frames_output = []
+				lst_frames_network = []
+				#set a timeout usefull to skip before networks
+				while time.time()<=timeuout:
+					# capture the next image
+					img_input = input.Capture()
 
-	# generate the mask
-	if buffers.mask:
-		net.Mask(buffers.mask, filter_mode=opt.filter_mode)
+					# allocate buffers for this size image
+					buffers.Alloc(img_input.shape, img_input.format)
 
-	# composite the images
-	if buffers.composite:
-		jetson.utils.cudaOverlay(buffers.overlay, buffers.composite, 0, 0)
-		jetson.utils.cudaOverlay(buffers.mask, buffers.composite, buffers.overlay.width, 0)
+					# process the segmentation network
+					net.Process(img_input, ignore_class=opt.ignore_class)
 
-	# render the output image
-	output.Render(buffers.output)
+					# generate the overlay
+					if buffers.overlay:
+						net.Overlay(buffers.overlay, filter_mode=opt.filter_mode)
 
-	# update the title bar
-	output.SetStatus("{:s} | Network {:.0f} FPS".format(opt.network, net.GetNetworkFPS()))
+					# generate the mask
+					if buffers.mask:
+						net.Mask(buffers.mask, filter_mode=opt.filter_mode)
 
-	# print out performance info
-	jetson.utils.cudaDeviceSynchronize()
-	net.PrintProfilerTimes()
+					# composite the images
+					if buffers.composite:
+						jetson.utils.cudaOverlay(buffers.overlay, buffers.composite, 0, 0)
+						jetson.utils.cudaOverlay(buffers.mask, buffers.composite, buffers.overlay.width, 0)
 
-    # compute segmentation class stats
-	if opt.stats:
-		buffers.ComputeStats()
-    
-	# exit on input/output EOS
-	if not input.IsStreaming() or not output.IsStreaming():
-		break
+					# render the output image
+					output.Render(buffers.output)
+
+					# update the title bar
+					output.SetStatus("{:s} | Network {:.0f} FPS".format(opt.network, net.GetNetworkFPS()))
+
+					# print out performance info
+					jetson.utils.cudaDeviceSynchronize()
+					net.PrintProfilerTimes()
+
+					# compute segmentation class stats
+					if opt.stats:
+						buffers.ComputeStats()
+					
+					print()
+					print("***********************************")
+					print("Actual Network: ", network)
+					print("{:s} | Input Source {:.0f} FPS".format("Video", input.GetFrameRate()))
+					print("{:s} | Output Source {:.0f} FPS".format("Display", output.GetFrameRate()))
+					print("{:s} | Network {:.0f} FPS".format(network, net.GetNetworkFPS()))
+					print("***********************************")
+					print()
+
+					lst_frames_input.append(input.GetFrameRate())
+					lst_frames_output.append(output.GetFrameRate())
+					lst_frames_network.append(net.GetNetworkFPS())
+					
+				dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Input")] = max(lst_frames_input)
+				dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Output")] = max(lst_frames_output)
+				dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Network")] = max(lst_frames_network)
+
+			print(dataframe)
+			input_name = save_Dataframe(single_input)
+			output_name = save_Dataframe(single_output)
+			filename = "benchmarks jetson input: " + input_name + " output: " + output_name +  ".csv"
+			dataframe.to_csv(operation+'/'+filename)
+
+networks_segNet = [
+	"fcn-resnet18-cityscapes-512x256",
+	"fcn-resnet18-cityscapes-1024x512",
+	"fcn-resnet18-cityscapes-2048x1024",
+	"fcn-resnet18-voc-320x320",
+	"fcn-resnet18-voc-512x320"
+]
+
+input_list = [
+	# "video/240p_60fps.mp4",
+	# "video/360p_30fps.mp4",
+	# "video/480p_30fps.mp4",
+	# "video/720p_30fps.mp4",
+	# "video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
+	"csi://0", 
+	"/dev/video1", 
+			]
+
+output_list = ["display://0", "rtp://192.168.1.52:5005"]
+
+get_fps(input_list, output_list, networks_segNet, "semantic_segmentation")
+
+
+
+
