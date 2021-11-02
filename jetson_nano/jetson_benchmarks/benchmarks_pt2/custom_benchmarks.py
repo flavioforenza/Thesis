@@ -31,8 +31,13 @@ import os
 
 def save_Dataframe(method):
 	switcher ={
-		"road.mp4": "video",
-		"rtp://192.168.1.53:5005": "SSH streaming",
+		"video/240p_30fps.mp4": "video 240p_30fps",
+		"video/360p_30fps.mp4": "video 360p_30fps",
+		"video/480p_30fps.mp4": "video 480p_30fps",
+		"video/720p_30fps.mp4": "video 720p_30fps",
+		"video/1080p_30fps.mp4": "video 1080p_30fps",
+		"video/1080p_60fps.mp4": "video 1080p_60fps",
+		"rtp://192.168.1.52:5005": "SSH streaming",
 		"display://0": "display",
 		"/dev/video1": "video1 streaming",
 		"csi://0": "video0 streaming",
@@ -44,10 +49,7 @@ def save_Dataframe(method):
 def get_fps(input_list, output_list, networks, operation):
 	for single_input in input_list:
 		for single_output in output_list:
-			if single_output == "display://0":
-				os.environ["DISPLAY"] = ':0'
-			else:
-				os.environ["DISPLAY"] = ''
+			os.environ["DISPLAY"] = ':0'
 
 			# parse the command line
 			parser = argparse.ArgumentParser(description="Locate objects in a live camera stream using an object detection DNN.", 
@@ -59,7 +61,7 @@ def get_fps(input_list, output_list, networks, operation):
 			parser.add_argument("--network", type=str, default="", help="pre-trained model to load (see below for options)")
 			parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
 			parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
-			parser.add_argument("--input-codec", type=str, default="", help="type of output-codec") 
+			parser.add_argument("--input-codec", type=str, default="h264", help="type of output-codec")
 
 			is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
@@ -118,7 +120,7 @@ def get_fps(input_list, output_list, networks, operation):
 			input_name = save_Dataframe(single_input)
 			output_name = save_Dataframe(single_output)
 			filename = "benchmarks jetson input: " + input_name + " output: " + output_name +  ".csv"
-			dataframe.to_csv(operation+"/"+filename)
+			dataframe.to_csv(operation+'/'+filename)
 
 networks_detectNet = [
 	"ssd-mobilenet-v1",
@@ -136,9 +138,20 @@ networks_segNet = [
 	"fcn-resnet18-voc-512x320"
 ]
 
-input_list = ["road.mp4", "csi://0", "/dev/video1", "images/*.jpg"]
-output_list = ["display://0", "rtp://192.168.1.53:5005"]
+input_list = [
+	"video/240p_30fps.mp4",
+	"video/360p_30fps.mp4",
+	"video/480p_30fps.mp4",
+	"video/720p_30fps.mp4",
+	"video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
+	"csi://0", 
+	"/dev/video1", 
+			]
 
-get_fps(input_list, output_list, networks_segNet, "semantic_segmentation")
+output_list = ["display://0", "rtp://192.168.1.52:5005"]
+
+get_fps(input_list, output_list, networks_detectNet, "object_detection")
+#get_fps(input_list, output_list, networks_segNet, "semantic_segmentation")
 
 
