@@ -9,11 +9,13 @@ from imutils.video import FPS
 
 path_to_onnx = "data/networks/FCN-ResNet18-Cityscapes-512x256/fcn_resnet18.onnx"
 
+model = onnx.load(path_to_onnx)
+
 def get_fps(network_file, weights, input_lst, classNames):
     for single_input in input_lst:
         #single_input = ""
         # construct the argument parse 
-        parser = argparse.ArgumentParser(description='Script to run MobileNet-SSD object detection network ')
+        parser = argparse.ArgumentParser(description='Script to run MobileNet-SSD object detection network')
 
         parser.add_argument("--video", type=str, default=single_input, help="path to video file. If empty, camera's stream will be used")
         parser.add_argument("--prototxt", type=str, default=network_file, help='Path to text network file: ''MobileNetSSD_deploy.prototxt for Caffe model or ')
@@ -46,7 +48,7 @@ def get_fps(network_file, weights, input_lst, classNames):
             # Capture frame-by-frame
             ret, frame = cap.read()
             frame_resized = cv2.resize(frame,(100,100))
-            blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (224, 224),(0, 0, 0), swapRB=True, crop=False)
+            blob = cv2.dnn.blobFromImage(frame, 0.007843, (300, 300), (127.5, 127.5, 127.5), False)
             #net.setInput(blob)
             #detections = net.forward()
 
@@ -60,48 +62,11 @@ def get_fps(network_file, weights, input_lst, classNames):
             #For get the class and location of object detected, 
             # There is a fix index for class, location and confidence
             # value in @detections array .
-            for i in range(detections_onnx.shape[2]):
-                confidence = detections_onnx[0, 0, i, 2] #Confidence of prediction
-                #confidence = confidence*-1 
-                if confidence > args.thr: # Filter prediction 
-                    class_id = int(detections_onnx[0, 0, i, 1]) # Class label
-                    # Object location 
-                    xLeftBottom = int(detections_onnx[0, 0, i, 3] * cols) 
-                    yLeftBottom = int(detections_onnx[0, 0, i, 4] * rows)
-                    xRightTop   = int(detections_onnx[0, 0, i, 5] * cols)
-                    yRightTop   = int(detections_onnx[0, 0, i, 6] * rows)
-            
-                    # Factor for scale to original size of frame
-                    heightFactor = frame.shape[0]/300.0  
-                    widthFactor = frame.shape[1]/300.0 
-                    # Scale object detection to frame
-                    xLeftBottom = int(widthFactor * xLeftBottom) 
-                    yLeftBottom = int(heightFactor * yLeftBottom)
-                    xRightTop   = int(widthFactor * xRightTop)
-                    yRightTop   = int(heightFactor * yRightTop)
-                    # Draw location of object  
-                    cv2.rectangle(frame, (xLeftBottom, yLeftBottom), (xRightTop, yRightTop),
-                                (0, 255, 0))
 
-                    # Draw label and confidence of prediction in frame resized
-                    if class_id in classNames:
-                        label = classNames[class_id] + ": " + str(confidence)
-                        labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-
-                        yLeftBottom = max(yLeftBottom, labelSize[1])
-                        cv2.rectangle(frame, (xLeftBottom, yLeftBottom - labelSize[1]),
-                                            (xLeftBottom + labelSize[0], yLeftBottom + baseLine),
-                                            (255, 255, 255), cv2.FILLED)
-                        cv2.putText(frame, label, (xLeftBottom, yLeftBottom),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-
-                        
-                        print(label)
-
-                cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-                cv2.imshow("frame", frame)
-                if cv2.waitKey(1) >= 0:  # Break with ESC 
-                    break
+            cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+            cv2.imshow("frame", frame)
+            if cv2.waitKey(1) >= 0:  # Break with ESC 
+                break
             fps.update()
         fps.stop()
         print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
@@ -111,7 +76,7 @@ def get_fps(network_file, weights, input_lst, classNames):
         
 
 input_list = [
-	"data/video/road.mp4"
+	"data/video/4k_60fps.mp4"
 			]
 
 #lables of network
