@@ -9,8 +9,6 @@ from imutils.video import FPS
 
 path_to_onnx = "data/networks/FCN-ResNet18-Cityscapes-512x256/fcn_resnet18.onnx"
 
-model = onnx.load(path_to_onnx)
-
 def get_fps(network_file, weights, input_lst, classNames):
     for single_input in input_lst:
         #single_input = ""
@@ -42,32 +40,42 @@ def get_fps(network_file, weights, input_lst, classNames):
         net_onnx = cv2.dnn.readNetFromONNX(path_to_onnx)
 
         timeuout = time.time() + 10
-
-
-        while time.time()<=timeuout:
+        while time.time()<timeuout:
             # Capture frame-by-frame
             ret, frame = cap.read()
-            frame_resized = cv2.resize(frame,(100,100))
-            blob = cv2.dnn.blobFromImage(frame, 0.007843, (300, 300), (127.5, 127.5, 127.5), False)
+            (h, w) = frame.shape[:2]
+            blob = cv2.dnn.blobFromImage(frame, 0.007843, (h, w), 127.5)
             #net.setInput(blob)
             #detections = net.forward()
 
             net_onnx.setInput(blob)
-            detections_onnx = net_onnx.forward()
+            detections = net_onnx.forward()
 
             #Size of frame resize (300x300)
-            cols = frame_resized.shape[1] 
-            rows = frame_resized.shape[0]
+            cols = frame.shape[1] 
+            rows = frame.shape[0]
 
-            #For get the class and location of object detected, 
-            # There is a fix index for class, location and confidence
-            # value in @detections array .
-
-            cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-            cv2.imshow("frame", frame)
-            if cv2.waitKey(1) >= 0:  # Break with ESC 
-                break
-            fps.update()
+            for i in np.arange(0, detections.shape[2]):
+                confidence = detections[0, 0, i, 2]
+                print(confidence)
+                if confidence > 0.5:
+                    # extract the index of the class label from the
+                    # `detections`, then compute the (x, y)-coordinates of
+                    # the bounding box for the object
+                    idx = int(detections[0, 0, i, 1])
+                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                    (startX, startY, endX, endY) = box.astype("int")
+                    CLASSES = list(classNames.values())
+                    COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+                    # draw the prediction on the frame
+                    label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+                    cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
+                    y = startY - 15 if startY - 15 > 15 else startY + 15
+                    cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+                    cv2.imshow("Frame", frame)
+                    if cv2.waitKey(1) >= 0:  # Break with ESC 
+                        break
+                    fps.update()
         fps.stop()
         print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
@@ -76,7 +84,7 @@ def get_fps(network_file, weights, input_lst, classNames):
         
 
 input_list = [
-	"data/video/4k_60fps.mp4"
+	"data/video/4k_30fps.mp4"
 			]
 
 #lables of network
