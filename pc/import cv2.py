@@ -8,8 +8,8 @@ from imutils.video import FPS
 
 def get_fps(network, path_to_onnx, single_input):
     path_network = 'data/networks/' + network
-    single_input = "data/" + single_input
     if ".mp4" in single_input: #video.mp4
+        single_input = "data/" + single_input
         cap = cv2.VideoCapture(single_input)
         total_num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         print("Total video's frames: ", total_num_frames)
@@ -21,7 +21,7 @@ def get_fps(network, path_to_onnx, single_input):
     else: #webcam
         frameWidth = 1280
         frameHeight = 720
-        cap = cv2.VideoCapture(single_input)
+        cap = cv2.VideoCapture(int(single_input))
         cap.set(3, frameWidth)
         cap.set(4, frameHeight)
         cap.set(10,150)
@@ -82,14 +82,14 @@ def get_fps(network, path_to_onnx, single_input):
     return fps_input, max(lst_frame), fps_inference.fps()
 
 lst_input = [
-	"video/240p_60fps.mp4",
-	"video/360p_30fps.mp4",
-	"video/480p_30fps.mp4",
-	"video/720p_30fps.mp4",
-	"video/1080p_30fps.mp4",
-	"video/1080p_60fps.mp4",
-	0, 
-	1
+	# "video/240p_60fps.mp4",
+	# "video/360p_30fps.mp4",
+	# "video/480p_30fps.mp4",
+	# "video/720p_30fps.mp4",
+	# "video/1080p_30fps.mp4",
+	# "video/1080p_60fps.mp4",
+	"0", 
+	"1"
     ]
 
 lst_networks = []
@@ -106,17 +106,24 @@ for i in range(1, len(dir_path)): #start from first
                 if '.onnx' in file and '.engine' not in file:
                     lst_networks.append(current_path[0].replace('data/networks/',""))
                     lst_path_onnx.append(file)
-                   
+
+dataframe = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_networks)                  
 results_dict = {}
 for i in range (0, len(lst_networks)):
     for input_source in lst_input:
         input, output , network_inference = get_fps(lst_networks[i], lst_path_onnx[i], input_source)
         results_dict[(lst_networks[i],input_source)] = [input, output, network_inference]
+        dataframe.iloc[dataframe.index.get_loc(lst_networks[i]), dataframe.columns.get_loc("Input")] = input
+        dataframe.iloc[dataframe.index.get_loc(lst_networks[i]), dataframe.columns.get_loc("Output")] = output
+        dataframe.iloc[dataframe.index.get_loc(lst_networks[i]), dataframe.columns.get_loc("Network")] = network_inference
+    
+print(dataframe)
+dataframe.to_csv()
     
 
 
 
 
-#dataframe = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_netowrks)
+
 
                     
