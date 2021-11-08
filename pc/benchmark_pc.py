@@ -3,11 +3,10 @@ import cv2
 import time
 import os 
 import pandas as pd
-import pickle
 
 from imutils.video import FPS
 
-def get_fps(network, path_to_onnx, single_input, rtp=""):
+def get_fps(network, path_to_onnx, single_input):
     path_network = 'data/networks/' + network
     if ".mp4" in single_input: #video.mp4
         single_input = "data/" + single_input
@@ -76,19 +75,11 @@ def get_fps(network, path_to_onnx, single_input, rtp=""):
                 
         fps_inference.update()#fps INFERENCE
 
-        if rtp: #stream on rtp
-            out = cv2.VideoWriter("appsrc ! videoconvert ! video/x-raw,format=I420 ! jpegenc ! rtpjpegpay ! rtpstreampay ! udpsink host=192.168.1.56 port=5005", cv2.CAP_GSTREAMER, 0, 24, (int(width), int(height)), True)
-            cv2.putText(frame, "FPS: {:.2f}".format(fps), (5,30), cv2.FONT_HERSHEY_PLAIN, 3,(0,255,0), 2)#FPS OUTPUT
-            out.write(frame)
-            key = cv2.waitKey(1)
-            if key==81 or key ==113:
-                break
-        else: #stream on display
-            cv2.putText(frame, "FPS: {:.2f}".format(fps), (5,30), cv2.FONT_HERSHEY_PLAIN, 3,(0,255,0), 2)#FPS OUTPUT
-            cv2.imshow("Frame", frame)
-            key = cv2.waitKey(1)
-            if key==81 or key ==113:
-                break
+        cv2.putText(frame, "FPS: {:.2f}".format(fps), (5,30), cv2.FONT_HERSHEY_PLAIN, 3,(0,255,0), 2)#FPS OUTPUT
+        cv2.imshow("Frame", frame)
+        key = cv2.waitKey(1)
+        if key==81 or key ==113:
+            break
 
     fps_inference.stop()
     print("FPS INPUT: {0}".format(fps_input))
@@ -127,7 +118,6 @@ for i in range(1, len(dir_path)): #start from first
                     lst_path_onnx.append(file)
 
 dataframe_display = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_input)   
-dataframe_rtp = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_input)                  
 for i in range (0, len(lst_networks)):
     for input_source in lst_input:
         #stream on display
@@ -135,18 +125,11 @@ for i in range (0, len(lst_networks)):
         dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Input")] = input
         dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Output")] = output
         dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Network")] = network_inference
-        #stream on rtp
-        input, output , network_inference = get_fps(lst_networks[i], lst_path_onnx[i], input_source, 1)    
-        dataframe_rtp.iloc[dataframe_rtp.index.get_loc(input_source), dataframe_rtp.columns.get_loc("Input")] = input
-        dataframe_rtp.iloc[dataframe_rtp.index.get_loc(input_source), dataframe_rtp.columns.get_loc("Output")] = output
-        dataframe_rtp.iloc[dataframe_rtp.index.get_loc(input_source), dataframe_rtp.columns.get_loc("Network")] = network_inference
+
 
     #save results
     dataframe_display.to_csv("semantic_seg_bench/network: " +  lst_networks[i] + " display")
-    dataframe_rtp.to_csv("semantic_seg_bench/network: " +  lst_networks[i] + " rtp")
 
-    if i ==4:
-        print("4")
 
 
 
