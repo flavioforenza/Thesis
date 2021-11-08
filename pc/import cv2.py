@@ -3,6 +3,7 @@ import cv2
 import time
 import os 
 import pandas as pd
+import pickle
 
 from imutils.video import FPS
 
@@ -82,12 +83,12 @@ def get_fps(network, path_to_onnx, single_input):
     return fps_input, max(lst_frame), fps_inference.fps()
 
 lst_input = [
-	# "video/240p_60fps.mp4",
-	# "video/360p_30fps.mp4",
-	# "video/480p_30fps.mp4",
-	# "video/720p_30fps.mp4",
-	# "video/1080p_30fps.mp4",
-	# "video/1080p_60fps.mp4",
+	"video/240p_60fps.mp4",
+	"video/360p_30fps.mp4",
+	"video/480p_30fps.mp4",
+	"video/720p_30fps.mp4",
+	"video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
 	"0", 
 	"1"
     ]
@@ -107,18 +108,19 @@ for i in range(1, len(dir_path)): #start from first
                     lst_networks.append(current_path[0].replace('data/networks/',""))
                     lst_path_onnx.append(file)
 
-dataframe = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_networks)                  
-results_dict = {}
+dataframe = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_input)                  
 for i in range (0, len(lst_networks)):
     for input_source in lst_input:
         input, output , network_inference = get_fps(lst_networks[i], lst_path_onnx[i], input_source)
-        results_dict[(lst_networks[i],input_source)] = [input, output, network_inference]
-        dataframe.iloc[dataframe.index.get_loc(lst_networks[i]), dataframe.columns.get_loc("Input")] = input
-        dataframe.iloc[dataframe.index.get_loc(lst_networks[i]), dataframe.columns.get_loc("Output")] = output
-        dataframe.iloc[dataframe.index.get_loc(lst_networks[i]), dataframe.columns.get_loc("Network")] = network_inference
-    
-print(dataframe)
-dataframe.to_csv()
+        dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Input")] = input
+        dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Output")] = output
+        dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Network")] = network_inference
+    dataframe.to_csv("semantic_seg_bench/network: " +  lst_networks[i] + " input: " + input_source.replace("video/", ""))
+    print(dataframe)
+
+
+
+
     
 
 
