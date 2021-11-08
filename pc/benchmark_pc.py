@@ -3,10 +3,14 @@ import cv2
 import time
 import os 
 import pandas as pd
+from pyvirtualdisplay import Display
+
 
 from imutils.video import FPS
 
 def get_fps(network, path_to_onnx, single_input):
+    disp = Display(visible=False, size=(100, 60))
+    disp.start()
     path_network = 'data/networks/' + network
     if ".mp4" in single_input: #video.mp4
         single_input = "data/" + single_input
