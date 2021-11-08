@@ -43,6 +43,12 @@ def get_fps(network, path_to_onnx, single_input, rtp=""):
 
     while time.time()<timeuout:
         _, frame = cap.read()
+
+        try:
+            frame.shape[:2]
+        except:
+            print("Sbagliato")
+
         frame_count +=1
 
         fps_end_time = time.time()
@@ -139,6 +145,8 @@ for i in range (0, len(lst_networks)):
     dataframe_display.to_csv("semantic_seg_bench/network: " +  lst_networks[i] + " display")
     dataframe_rtp.to_csv("semantic_seg_bench/network: " +  lst_networks[i] + " rtp")
 
+    if i ==4:
+        print("4")
 
 
 
