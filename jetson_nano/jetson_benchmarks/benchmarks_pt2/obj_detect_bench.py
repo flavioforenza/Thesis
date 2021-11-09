@@ -130,12 +130,12 @@ networks_detectNet = [
 ]
 
 input_list = [
-	#"video/240p_60fps.mp4",
-	# "video/360p_30fps.mp4",
-	# "video/480p_30fps.mp4",
-	# "video/720p_30fps.mp4",
-	# "video/1080p_30fps.mp4",
-	# "video/1080p_60fps.mp4",
+	"video/240p_60fps.mp4",
+	"video/360p_30fps.mp4",
+	"video/480p_30fps.mp4",
+	"video/720p_30fps.mp4",
+	"video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
 	"csi://0", 
 	"/dev/video1"
 			]
