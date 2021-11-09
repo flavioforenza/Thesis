@@ -52,8 +52,6 @@ def get_fps(input_list, output_list, networks, operation):
 		for single_output in output_list:
 			os.environ["DISPLAY"] = ':0'
 
-			# parse the command line
-			# parse the command line
 			parser = argparse.ArgumentParser(description="Segment a live camera stream using an semantic segmentation DNN.", 
 											formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.segNet.Usage() +
 											jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
@@ -66,6 +64,7 @@ def get_fps(input_list, output_list, networks, operation):
 			parser.add_argument("--ignore-class", type=str, default="void", help="optional name of class to ignore in the visualization results (default: 'void')")
 			parser.add_argument("--alpha", type=float, default=150.0, help="alpha blending value to use during overlay, between 0.0 and 255.0 (default: 150.0)")
 			parser.add_argument("--stats", action="store_true", help="compute statistics about segmentation mask class output")
+
 
 			is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
@@ -80,19 +79,15 @@ def get_fps(input_list, output_list, networks, operation):
 
 			for network in networks:
 				# load the segmentation network
-				net = jetson.inference.segNet(opt.network, sys.argv)
-
-				# set the alpha blending value
-				net.SetOverlayAlpha(opt.alpha)
+				net = jetson.inference.segNet(network)
 
 				# create video output
 				output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
-
 				# create buffer manager
 				buffers = segmentationBuffers(net, opt)
 
 				# create video source
-				input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
+				input = jetson.utils.videoSource(opt.input_URI)
 
 				timeuout = time.time() + 10
 				lst_frames_input = []
@@ -107,15 +102,15 @@ def get_fps(input_list, output_list, networks, operation):
 					buffers.Alloc(img_input.shape, img_input.format)
 
 					# process the segmentation network
-					net.Process(img_input, ignore_class=opt.ignore_class)
+					net.Process(img_input)
 
 					# generate the overlay
 					if buffers.overlay:
-						net.Overlay(buffers.overlay, filter_mode=opt.filter_mode)
+						net.Overlay(buffers.overlay)
 
 					# generate the mask
 					if buffers.mask:
-						net.Mask(buffers.mask, filter_mode=opt.filter_mode)
+						net.Mask(buffers.mask)
 
 					# composite the images
 					if buffers.composite:
@@ -126,11 +121,11 @@ def get_fps(input_list, output_list, networks, operation):
 					output.Render(buffers.output)
 
 					# update the title bar
-					output.SetStatus("{:s} | Network {:.0f} FPS".format(opt.network, net.GetNetworkFPS()))
+					output.SetStatus("{:s} | Network {:.0f} FPS".format(network, net.GetNetworkFPS()))
 
 					# print out performance info
-					jetson.utils.cudaDeviceSynchronize()
-					net.PrintProfilerTimes()
+					# jetson.utils.cudaDeviceSynchronize()
+					# net.PrintProfilerTimes()
 
 					# compute segmentation class stats
 					if opt.stats:
@@ -173,9 +168,9 @@ input_list = [
 	# "video/480p_30fps.mp4",
 	# "video/720p_30fps.mp4",
 	# "video/1080p_30fps.mp4",
-	"video/1080p_60fps.mp4",
+	# "video/1080p_60fps.mp4",
 	"csi://0", 
-	"/dev/video1", 
+	"/dev/video1"
 			]
 
 output_list = ["display://0", "rtp://192.168.1.52:5005"]

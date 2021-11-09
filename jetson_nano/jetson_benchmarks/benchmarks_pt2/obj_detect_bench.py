@@ -75,11 +75,11 @@ def get_fps(input_list, output_list, networks, operation):
 
 			for network in networks:
 				# load the object detection network
-				net = jetson.inference.detectNet(network, sys.argv, opt.threshold)
+				net = jetson.inference.detectNet(network)
 				# create video output object 
 				output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
 				# create video sources
-				input = jetson.utils.videoSource(opt.input_URI, argv=sys.argv)
+				input = jetson.utils.videoSource(opt.input_URI)
 				timeuout = time.time() + 10
 				lst_frames_input = []
 				lst_frames_output = []
@@ -109,7 +109,7 @@ def get_fps(input_list, output_list, networks, operation):
 					lst_frames_network.append(net.GetNetworkFPS())
 
 					# print out performance info
-					net.PrintProfilerTimes()
+					#net.PrintProfilerTimes()
 					
 				dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Input")] = max(lst_frames_input)
 				dataframe.iloc[dataframe.index.get_loc(network), dataframe.columns.get_loc("Output")] = max(lst_frames_output)
@@ -130,14 +130,14 @@ networks_detectNet = [
 ]
 
 input_list = [
-	"video/240p_60fps.mp4",
-	"video/360p_30fps.mp4",
-	"video/480p_30fps.mp4",
-	"video/720p_30fps.mp4",
-	"video/1080p_30fps.mp4",
-	"video/1080p_60fps.mp4",
+	#"video/240p_60fps.mp4",
+	# "video/360p_30fps.mp4",
+	# "video/480p_30fps.mp4",
+	# "video/720p_30fps.mp4",
+	# "video/1080p_30fps.mp4",
+	# "video/1080p_60fps.mp4",
 	"csi://0", 
-	"/dev/video1", 
+	"/dev/video1"
 			]
 
 output_list = ["display://0", "rtp://192.168.1.52:5005"]
