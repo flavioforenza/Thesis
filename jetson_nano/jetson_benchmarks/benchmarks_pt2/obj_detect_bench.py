@@ -40,7 +40,7 @@ def save_Dataframe(method):
 		"rtp://192.168.1.52:5005": "SSH streaming",
 		"display://0": "display",
 		"/dev/video1": "video1 streaming",
-		"csi://0": "video0 streaming"
+		"csi://0": "video0 streaming",
 	}
 	return switcher.get(method, lambda: 'Invalid source')
 
@@ -130,14 +130,14 @@ networks_detectNet = [
 ]
 
 input_list = [
-	# "video/240p_60fps.mp4",
-	# "video/360p_30fps.mp4",
-	# "video/480p_30fps.mp4",
-	# "video/720p_30fps.mp4",
-	# "video/1080p_30fps.mp4",
-	# "video/1080p_60fps.mp4",
-	# "csi://0", 
-	"/dev/video1"
+	"video/240p_60fps.mp4",
+	"video/360p_30fps.mp4",
+	"video/480p_30fps.mp4",
+	"video/720p_30fps.mp4",
+	"video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
+	"csi://0", 
+	"/dev/video1", 
 			]
 
 output_list = ["display://0", "rtp://192.168.1.52:5005"]
