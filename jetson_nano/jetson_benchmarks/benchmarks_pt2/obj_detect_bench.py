@@ -142,6 +142,6 @@ input_list = [
 
 output_list = ["display://0", "rtp://192.168.1.52:5005"]
 
-get_fps(input_list, output_list, networks_detectNet, "object_detection")
+get_fps(input_list, output_list, networks_detectNet, "object_detection_jetson_utils")
 
 

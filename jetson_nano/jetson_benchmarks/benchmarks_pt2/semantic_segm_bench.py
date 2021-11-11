@@ -175,7 +175,7 @@ input_list = [
 
 output_list = ["display://0", "rtp://192.168.1.52:5005"]
 
-get_fps(input_list, output_list, networks_segNet, "semantic_segmentation")
+get_fps(input_list, output_list, networks_segNet, "semantic_segmentation_jetson_utils")
 
 
 
