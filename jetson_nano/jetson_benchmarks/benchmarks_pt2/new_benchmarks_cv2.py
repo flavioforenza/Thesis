@@ -24,8 +24,8 @@ def get_fps(network, path_to_onnx, video):
     net = cv2.dnn.readNetFromONNX(path_to_onnx)
 
     #comment this two lines to execute code only with cpu
-    #net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-    #net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
     time_elap = []
     fps_output_list = []
@@ -117,12 +117,12 @@ def get_fps(network, path_to_onnx, video):
     return fps_input, fps_output, fps_inference
 
 lst_input = [
-	"video/240p_60fps.mp4",
-	"video/360p_30fps.mp4",
-	"video/480p_30fps.mp4",
-	"video/720p_30fps.mp4",
-	"video/1080p_30fps.mp4",
-	"video/1080p_60fps.mp4",
+	# "video/240p_60fps.mp4",
+	# "video/360p_30fps.mp4",
+	# "video/480p_30fps.mp4",
+	# "video/720p_30fps.mp4",
+	# "video/1080p_30fps.mp4",
+	# "video/1080p_60fps.mp4",
 	"0", 
 	"1"
     ]
@@ -144,20 +144,19 @@ for i in range(1, len(dir_path)): #start from first
 
 dataframe_display = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_input)   
 for i in range (0, len(lst_networks)):
-    j=3
-    input_source =lst_input[j]
-    #stream on display
-    input, output , network_inference = get_fps(lst_networks[i],"data/networks/"+lst_networks[i]+"/"+lst_path_onnx[i], "data/"+input_source)
-    if os.path.isfile(r"semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i])):
-        dataframe = pd.read_csv("semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i]), index_col=0)
-        dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Input")] = input
-        dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Output")] = output
-        dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Network")] = network_inference
-        dataframe.to_csv(r"semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i]))
-    else:
-        dataframe_display = pd.DataFrame(np.nan, index=lst_input, columns=["Input", "Output", "Network"]) 
-        dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Input")] = input
-        dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Output")] = output
-        dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Network")] = network_inference
-        dataframe_display.to_csv(r"semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i]))
+    for input_source in lst_input:
+        #stream on display
+        input, output , network_inference = get_fps(lst_networks[i],"data/networks/"+lst_networks[i]+"/"+lst_path_onnx[i], "data/"+input_source)
+        if os.path.isfile(r"semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i])):
+            dataframe = pd.read_csv("semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i]), index_col=0)
+            dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Input")] = input
+            dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Output")] = output
+            dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Network")] = network_inference
+            dataframe.to_csv(r"semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i]))
+        else:
+            dataframe_display = pd.DataFrame(np.nan, index=lst_input, columns=["Input", "Output", "Network"]) 
+            dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Input")] = input
+            dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Output")] = output
+            dataframe_display.iloc[dataframe_display.index.get_loc(input_source), dataframe_display.columns.get_loc("Network")] = network_inference
+            dataframe_display.to_csv(r"semantic_segmentation_cv2/network: {} display.csv".format(lst_networks[i]))
     
