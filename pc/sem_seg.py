@@ -95,12 +95,12 @@ def get_fps(network, path_to_onnx, video):
 
 
 lst_input = [
-	# "video/240p_60fps.mp4",
-	# "video/360p_30fps.mp4",
-	# "video/480p_30fps.mp4",
-	# "video/720p_30fps.mp4",
-	# "video/1080p_30fps.mp4",
-	# "video/1080p_60fps.mp4",
+	"video/240p_60fps.mp4",
+	"video/360p_30fps.mp4",
+	"video/480p_30fps.mp4",
+	"video/720p_30fps.mp4",
+	"video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
 	"0", 
 	"1"
     ]
@@ -129,9 +129,7 @@ for i in range (0, len(lst_networks)):
             dataframe = pd.read_csv("semantic_seg_bench/network: {} display.csv".format(lst_networks[i]), index_col=0)
             if input_source not in dataframe.index:
                 data_new = pd.DataFrame(np.nan, index=[input_source], columns=["Input", "Output", "Network"]) 
-                print(data_new)
                 dataframe = dataframe.append(data_new)
-                print(dataframe)
             dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Input")] = input
             dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Output")] = output
             dataframe.iloc[dataframe.index.get_loc(input_source), dataframe.columns.get_loc("Network")] = network_inference
