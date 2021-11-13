@@ -22,8 +22,11 @@ def get_fps(network, path_to_onnx, video):
     os.environ["DISPLAY"] = ':0'
     print("[INFO] loading model...")
     net = cv2.dnn.readNetFromONNX(path_to_onnx)
-    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+
+    #comment this two lines to execute code only with cpu
+    #net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+    #net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+
     time_elap = []
     fps_output_list = []
 
@@ -58,21 +61,12 @@ def get_fps(network, path_to_onnx, video):
     while frames <= total_num_frames:
         (grabbed, frame) = vs.read()
 
-        # gpu_frame = cv2.cuda_GpuMat()
-        # gpu_frame.upload(frame)
-
-        # frame = gpu_frame.download()
-
         frames += 1 
         print("Current frame: ", frames, " on: ", total_num_frames, " network:", network, " Source: ", video)
         if not grabbed:
             break
         if video[-1] != "4":
             frame = im.resize(frame, width=1280)
-
-        
-
-        #h,w network
 
         h,w = resolutions[network]
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (h, w), 0, swapRB=True, crop=False)
@@ -103,6 +97,7 @@ def get_fps(network, path_to_onnx, video):
         fps = 1/dt
         fpsFilter=.9*fpsFilter+.1*fps
         fps_output_list.append(fpsFilter)
+
         cv2.putText(output, str(round(fpsFilter,1))+ ' fps', (0,30), font, 1,(0,0,255), 2)
         cv2.imshow("Frame", output) 
         key = cv2.waitKey(1) & 0xFF
@@ -149,7 +144,7 @@ for i in range(1, len(dir_path)): #start from first
 
 dataframe_display = pd.DataFrame(columns=["Input", "Output", "Network"], index=lst_input)   
 for i in range (0, len(lst_networks)):
-    j=7
+    j=3
     input_source =lst_input[j]
     #stream on display
     input, output , network_inference = get_fps(lst_networks[i],"data/networks/"+lst_networks[i]+"/"+lst_path_onnx[i], "data/"+input_source)
