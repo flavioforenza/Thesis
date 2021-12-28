@@ -81,13 +81,22 @@ def get_fps(input_list, output_list, networks, operation):
 				# load the segmentation network
 				net = jetson.inference.segNet(network)
 
+				print(net)
+
 				# create video output
 				output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
+
+				print(output)
+
 				# create buffer manager
 				buffers = segmentationBuffers(net, opt)
+				
+				print(buffers)
 
 				# create video source
 				input = jetson.utils.videoSource(opt.input_URI)
+
+				print(input)
 
 				timeuout = time.time() + 10
 				lst_frames_input = []
@@ -163,14 +172,14 @@ networks_segNet = [
 ]
 
 input_list = [
-	# "video/240p_60fps.mp4",
+	"video/240p_60fps.mp4",
 	# "video/360p_30fps.mp4",
 	# "video/480p_30fps.mp4",
 	# "video/720p_30fps.mp4",
 	# "video/1080p_30fps.mp4",
 	# "video/1080p_60fps.mp4",
-	"csi://0", 
-	"/dev/video1"
+	#"csi://0", 
+	#"/dev/video1"
 			]
 
 output_list = ["display://0", "rtp://192.168.1.52:5005"]
