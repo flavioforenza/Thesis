@@ -10,3 +10,4 @@ ckpt/*
 **data/
 **networks/
 *.caffemodel
+*.json
