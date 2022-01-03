@@ -5,6 +5,8 @@ import numpy as np
 
 import onnx
 from onnx2keras import onnx_to_keras
+import keras2onnx
+
 
 class Distiller(keras.Model):
     def __init__(self, student, teacher):
@@ -94,11 +96,48 @@ class Distiller(keras.Model):
         results.update({"student_loss": student_loss})
         return results
 
-path_onnx_model = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/ssd-mobilenet.onnx'
-teacher = onnx.load(path_onnx_model)
-teacher = onnx_to_keras(teacher, ['input_0'])
-teacher.save('./model/teacher.h5')
+#path_onnx_model = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/ssd-mobilenet.onnx'
+#teacher = onnx.load(path_onnx_model)
+#teacher = onnx_to_keras(teacher, ['input_0'])
+#teacher.save('./model/teacher.h5')
 
+#import teacher
 teacher = keras.models.load_model('./model/teacher.h5')
+#keras.utils.plot_model(teacher)
+#print(teacher.summary())
 
-print(teacher.summary())
+# Create the student
+student = keras.Sequential(
+    [
+        keras.Input(shape=(28, 28, 1)),
+        layers.Conv2D(16, (3, 3), strides=(2, 2), padding="same"),
+        layers.LeakyReLU(alpha=0.2),
+        layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
+        layers.Conv2D(32, (3, 3), strides=(2, 2), padding="same"),
+        layers.Flatten(),
+        layers.Dense(10),
+    ],
+    name="student",
+)
+
+# Clone student for later comparison
+student_scratch = keras.models.clone_model(student)
+
+teacher.compile(
+    optimizer=keras.optimizers.Adam(),
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    metrics=[keras.metrics.SparseCategoricalAccuracy()],
+)
+
+distiller = Distiller(student=student, teacher=teacher)
+distiller.compile(
+    optimizer=keras.optimizers.Adam(),
+    metrics=[keras.metrics.SparseCategoricalAccuracy()],
+    student_loss_fn=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    distillation_loss_fn=keras.losses.KLDivergence(),
+    alpha=0.1,
+    temperature=10,
+)
+
+onnx_model = keras2onnx.convert_keras(distiller, distiller.name)
+print(onnx_model)
