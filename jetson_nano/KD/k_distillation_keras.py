@@ -1,12 +1,15 @@
+#import cv2
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
-
 import onnx
 from onnx2keras import onnx_to_keras
 import keras2onnx
-
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import os
+import pickle
+from PIL import Image
 
 class Distiller(keras.Model):
     def __init__(self, student, teacher):
@@ -103,6 +106,12 @@ class Distiller(keras.Model):
 
 #import teacher
 teacher = keras.models.load_model('./model/teacher.h5')
+
+#view weights
+for layer in teacher.layers:
+    print(layer.name)
+
+
 #keras.utils.plot_model(teacher)
 #print(teacher.summary())
 
@@ -139,5 +148,38 @@ distiller.compile(
     temperature=10,
 )
 
-onnx_model = keras2onnx.convert_keras(distiller, distiller.name)
-print(onnx_model)
+#config dataset
+img_width, img_height = 300, 300 #width & height of input image
+input_depth = 3 #RGB
+imgs_folder = r'/home/flavio/thesis/jetson_nano/train-ssd/data/automotive/train/'
+testing_data_dir = '/home/flavio/thesis/jetson_nano/train-ssd/data/automotive/test/'
+#labels_path = '/home/flavio/thesis/jetson_nano/train-ssd/models/labels.txt'
+labels = ['BACKGROUND', 'Bicycle', 'Building', 'Bus', 'Car', 'Motorcycle', 'Person', 'Traffic light', 'Traffic sign', 'Train', 'Truck']
+epochs = 2 #number of training epoch
+batch_size = 5 #training batch size
+
+def create_dataset(img_folder):   
+    img_data_array=[]
+    for file in os.listdir(img_folder):
+        image_path= os.path.join(img_folder, file)
+        image= np.array(Image.open(image_path))
+        image= np.resize(image, (img_height, img_width, 3))
+        image = image.astype('float32')
+        image /= 255 
+        img_data_array.append(image)
+    return img_data_array
+
+img_data =create_dataset(imgs_folder)
+
+target_dict={k: v for v, k in enumerate(np.unique(labels))}
+print(target_dict)
+
+target_val=  [target_dict[labels[i]] for i in range(len(labels))]
+print("TARGET: ", target_val)
+
+history = distiller.fit(x=np.array(img_data, np.float32), y=np.array(list(map(int,target_val)), np.float32), epochs=3)
+
+
+#addestrare il distiller prima di esportare il tutto
+#onnx_model = keras2onnx.convert_keras(distiller, distiller.name)
+#print(onnx_model)
