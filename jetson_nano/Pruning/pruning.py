@@ -1,11 +1,14 @@
-
 import torch
 import torch.nn.utils.prune as prune
 import sys
 import logging
+import os.path
 from vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
+from loaders import *
+from vision.ssd.config import mobilenetv1_ssd_config
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+#DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format='%(asctime)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -14,15 +17,26 @@ if torch.cuda.is_available():
     torch.backends.cudnn.benchmark = True
     logging.info("Using CUDA...")
 
-def prune_net(val_pruned):
-    create_net = create_mobilenetv1_ssd
-    path_custom_model = './model_100.pth'
-    # num_classe == num_labels in models/labeles.txt
-    num_classes = 11
-    net = create_net(num_classes)
-    net.load(path_custom_model)
+#getting the new model (SSD-Mobilenet-V1)
+def create_model():
+    _, _, num_classes = get_loaders(4,4)
+    model = create_mobilenetv1_ssd
+    net = model(num_classes)
+    #net.save(path)
+    return net
 
-    net.eval()
+def prune_net(val_pruned):
+    path_virgin_model = './models/original_SSD_Mobilenet_V1.pth'
+    path_checkpoints = './models/checkpoints/'
+    net = create_model()
+    if os.path.isfile(path_virgin_model):
+        #if exists a pretrained model
+        if os.path.isdir('./models/checkpoints/'):
+            for file in os.listdir('./models/checkpoints/'):
+                if file.endswith(".pth"):
+                    net.load(path_checkpoints+file)
+        else: #get the virgin model
+            net.load(path_virgin_model)
 
     for name, module in net.named_modules():
         if isinstance(module, torch.nn.Conv2d):
@@ -45,7 +59,7 @@ def prune_net(val_pruned):
 
     return net
 
-#Save model prunned
-pruned_amount = 80
-net = prune_net(pruned_amount)
-net.save('./models/' + str(pruned_amount) + '%_pruned_model_100.pth')
+for i in range(10, 80):
+    pruned_amount = i
+    net = prune_net(pruned_amount)
+    net.save('./models/pruned' + str(pruned_amount) + '%_pruned_model.pth')

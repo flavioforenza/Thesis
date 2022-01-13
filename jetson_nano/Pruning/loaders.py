@@ -19,7 +19,7 @@ def get_loaders(batch_size_train, batch_size_test):
     target_transform = MatchPrior(config.priors, config.center_variance,
                                   config.size_variance, 0.5)
 
-    path_dataset = ['/home/flavio/thesis/jetson_nano/train-ssd/data/automotive/']
+    path_dataset = ['/home/flavio/thesis/jetson_nano/train-ssd/data/OpenImages/']
 
     datasets = []
     for dataset_path in path_dataset:
@@ -46,5 +46,5 @@ def get_loaders(batch_size_train, batch_size_test):
                             num_workers=4,
                             shuffle=False)
 
-    return train_loader, val_loader, datasets
+    return train_loader, val_loader, len(dataset.class_names) #num_classes
 
