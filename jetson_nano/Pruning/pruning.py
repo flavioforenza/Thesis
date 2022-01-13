@@ -16,10 +16,11 @@ if torch.cuda.is_available():
 
 def prune_net(val_pruned):
     create_net = create_mobilenetv1_ssd
-
+    path_custom_model = './model_100.pth'
     # num_classe == num_labels in models/labeles.txt
     num_classes = 11
     net = create_net(num_classes)
+    net.load(path_custom_model)
 
     net.eval()
 
@@ -31,14 +32,20 @@ def prune_net(val_pruned):
             print("Module", module)
             #print(list(module.named_parameters()))
             #print(module.weight)
-            prune.l1_unstructured(module, name='weight', amount=val_pruned/100)
+            #prune.l1_unstructured(module, name='weight', amount=val_pruned/100)
+
+            prune.ln_structured(module, 'weight', val_pruned/100, n=2, dim=1)
+
+            #prune.l1_unstructured(module, name='bias', amount=3)
             #print("####### AFTER #######")
             #print(module.weight)
+            prune.remove(module, 'weight') #remove mask
+            #prune.remove(module, 'bias') #remove mask
             print("Sparsity in conv2.weight: {:.2f}%".format(100. * float(torch.sum(module.weight == 0))/ float(module.weight.nelement())))
 
     return net
 
 #Save model prunned
-pruned_amount = 20
+pruned_amount = 80
 net = prune_net(pruned_amount)
 net.save('./models/' + str(pruned_amount) + '%_pruned_model_100.pth')
