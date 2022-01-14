@@ -25,7 +25,7 @@ def create_model():
     #net.save(path)
     return net
 
-def prune_net(val_pruned):
+def load_net():
     path_virgin_model = './models/original_SSD_Mobilenet_V1.pth'
     path_checkpoints = './models/checkpoints/'
     net = create_model()
@@ -35,31 +35,54 @@ def prune_net(val_pruned):
             for file in os.listdir('./models/checkpoints/'):
                 if file.endswith(".pth"):
                     net.load(path_checkpoints+file)
+                else:
+                    print("No checkpoint models exist!")
+                    return 0
         else: #get the virgin model
             net.load(path_virgin_model)
+    return net
 
-    for name, module in net.named_modules():
+def prune_net_global(val_pruned):
+    net = load_net()
+    module_tups = []
+    for _, module in net.named_modules():
         if isinstance(module, torch.nn.Conv2d):
-            #print("Sparsity in conv2.weight: {:.2f}%".format(100. * float(torch.sum(module.weight == 0))/ float(module.weight.nelement())))
-            #print("####### BEFORE #######")
-            print("Name:", name) 
-            print("Module", module)
-            #print(list(module.named_parameters()))
-            #print(module.weight)
-            #prune.l1_unstructured(module, name='weight', amount=val_pruned/100)
+            module_tups.append((module,'weight'))
+    
+    prune.global_unstructured(
+        parameters=module_tups, 
+        pruning_method=prune.L1Unstructured,
+        amount=val_pruned/100
+    )
 
-            prune.ln_structured(module, 'weight', val_pruned/100, n=2, dim=1)
+    print("Sparsity in conv2.weight: {:.2f}%".format(100. * float(torch.sum(module.weight == 0))/ float(module.weight.nelement())))
 
-            #prune.l1_unstructured(module, name='bias', amount=3)
-            #print("####### AFTER #######")
-            #print(module.weight)
-            prune.remove(module, 'weight') #remove mask
-            #prune.remove(module, 'bias') #remove mask
+    for module, _ in module_tups:
+        prune.remove(module, 'weight')
+    return net
+
+def prune_net_local(val_pruned, method):
+    net = load_net()
+    for _, module in net.named_modules():
+        if isinstance(module, torch.nn.Conv2d):
+            if method == 'unstructured':
+                prune.l1_unstructured(module, name='weight', amount=val_pruned/100)
+                #prune.l1_unstructured(module, name='bias', amount=3)
+
+            elif method == 'structured':
+                prune.ln_structured(module, 'weight', val_pruned/100, n=1, dim=1)
+            
             print("Sparsity in conv2.weight: {:.2f}%".format(100. * float(torch.sum(module.weight == 0))/ float(module.weight.nelement())))
-
+            prune.remove(module, 'weight') #remove mask
     return net
 
 for i in range(10, 80):
     pruned_amount = i
-    net = prune_net(pruned_amount)
-    net.save('./models/pruned' + str(pruned_amount) + '%_pruned_model.pth')
+    #net_local_unstructured = prune_net_local(pruned_amount, 'unstructured')
+    #net_local_unstructured.save('./models/pruned/local-unstructured/' + str(pruned_amount) + '%_unstructured_pruned_model.pth')
+
+    #net_local_structured = prune_net_local(pruned_amount, 'structured')
+    #net_local_structured.save('./models/pruned/local-structured/' + str(pruned_amount) + '%_structured_pruned_model.pth')
+
+    net_global= prune_net_global(pruned_amount)
+    net_global.save('./models/pruned/global/' + str(pruned_amount) + '%_global_pruned_model.pth')
