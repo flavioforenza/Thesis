@@ -11,3 +11,4 @@ ckpt/*
 **networks/
 *.caffemodel
 *.json
+*.pth
