@@ -8,6 +8,7 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 from tqdm import tqdm 
 from vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
@@ -21,6 +22,8 @@ warnings.filterwarnings("ignore")
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format='%(asctime)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
+
+methods = ["unstructured", "structured", 'global']
 
 #if torch.cuda.is_available():
 #    torch.backends.cudnn.benchmark = True
@@ -85,8 +88,8 @@ def prune_net_local(val_pruned, method):
 
 
 def generate_pruned_models(start, total_percentage, step):
-    print("Generating the pruned models...")
-    with tqdm(total=(total_percentage-step)/step, file=sys.stdout) as pbar:
+    print("Generating pruned models...")
+    with tqdm(total=total_percentage/step, file=sys.stdout) as pbar:
         logging.disable(logging.CRITICAL)
         for i in range(start, step+total_percentage, step):
             sys.stdout = open(os.devnull, 'w')
@@ -104,14 +107,13 @@ def generate_pruned_models(start, total_percentage, step):
             pbar.update(1)
             
 #get all models pruned
-#start = 0 #initial amout of pruning
-#step = 5 
-#stop = 100 + step #final amout of pruning (step excluded)
-#generate_pruned_models(start, stop, step)
+# start = 0 #initial amout of pruning
+# step = 5 
+# stop = 100 #final amout of pruning (step excluded)
+# generate_pruned_models(start, stop, step)
 
 #evaluation loss of any pruned models
 def get_loss():
-    methods = ["unstructured", "structured", 'global']
     dict_loss = {k: [] for k in methods}
 
     path_prn = './models/pruned/'
@@ -121,15 +123,20 @@ def get_loss():
     criterion = MultiboxLoss(config.priors, iou_threshold=0.5, neg_pos_ratio=3,
                                 center_variance=0.1, size_variance=0.2, device=DEVICE)
 
-    with tqdm(total=len(os.listdir(path_prn+methods[0]))*len(methods), file=sys.stdout) as pbar:
+    print("Computing losses values...")
+    with tqdm(total=len(os.listdir(path_prn+methods[0]))*len(methods), file=sys.stdout) as pbar:    
         for method in methods:
             path_single_method = path_prn+method
             if os.path.isdir(path_single_method):
-                    for file in os.listdir(path_single_method):
+                    # files =  os.listdir(path_single_method)
+                    # sorted_files =  sorted(files)
+                    # print(sorted_files)
+                    for i in range(0, 105, 5):
+                        path_file = str(i)+'%_'+method+'_pruned_model.pth'
                         logging.disable(logging.CRITICAL)
                         sys.stdout = open(os.devnull, 'w')
                         net = create_model()
-                        net.load(path_single_method+'/'+file)
+                        net.load(path_single_method+'/'+path_file)
                         net.cuda()
                         loss, regression_loss, classification_loss = test(val_loader, net, criterion, DEVICE)
                         #print("Validation Loss:", loss)
@@ -142,6 +149,8 @@ def get_loss():
     pickle.dump(dict_loss, a_file)
     a_file.close()
 
+#create dict_loss
+get_loss()
 
 def get_plot(method, index):
     file = open("dict_loss.pkl", "rb")
@@ -153,13 +162,16 @@ def get_plot(method, index):
         total_amount = i * 5
         vl = dict_loss[method]
         loss = vl[i][index] #get the loss of currente percentage
-        losses.append((total_amount,loss))
+        losses.append((total_amount/100,loss))
 
     pd.DataFrame.assign
 
-    (pd.DataFrame(losses, columns=['sparsity', 'loss']).pipe(lambda df: df.assign(perf=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1)).head(15).plot.line(x='sparsity', y='perf', figsize=(12, 8), title="L1 Unstructured Pruned Mean Batch Loss"))
+    (pd.DataFrame(losses, columns=['sparsity', 'loss'])
+    .pipe(lambda df: df.assign(perf=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
+    .plot.line(x='sparsity', y='perf', figsize=(12, 8), title="L1 " + method +  " Pruned Mean Batch Loss"))
     sns.despine()
 
-    plt.savefig("out.png")
+    plt.savefig(method+"_" + "600"+ ".png")
 
-get_plot('unstructured', 0)
+for i in range(0,3):
+    get_plot(methods[i], i)

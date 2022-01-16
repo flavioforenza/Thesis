@@ -1,6 +1,4 @@
-import torch
-import torchvision
-import os
+import logging
 
 from vision.datasets.open_images import OpenImagesDataset
 from vision.ssd.data_preprocessing import TrainAugmentation, TestTransform
@@ -30,6 +28,8 @@ def get_loaders(batch_size_train, batch_size_test):
 
     train_dataset = ConcatDataset(datasets)
 
+    logging.info("Train dataset size: {}".format(len(train_dataset)))
+
     train_loader = DataLoader(train_dataset, batch_size_train,
                               num_workers=4,
                               shuffle=True)
@@ -41,6 +41,8 @@ def get_loaders(batch_size_train, batch_size_test):
     val_dataset = OpenImagesDataset(dataset_path,
                                     transform=test_transform, target_transform=target_transform,
                                     dataset_type="test")                             
+
+    logging.info("Validation dataset size: {}".format(len(val_dataset)))
 
     val_loader = DataLoader(val_dataset, batch_size_test,
                             num_workers=4,
