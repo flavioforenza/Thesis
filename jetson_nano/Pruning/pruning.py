@@ -1,3 +1,5 @@
+from ast import operator
+from asyncio import subprocess
 from copyreg import remove_extension
 from this import d
 from turtle import update
@@ -12,23 +14,28 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
-#import torchvision.models as models
-#import simplify
 import torch.onnx
+import subprocess as sp
 
-#from torch import fx
+sys.path.append('../jetson_benchmarks/benchmarks_pt2/')
+from obj_detection_ssd_custom_utils import get_fps
+
+sys.path.append('/home/flavio/thesis/jetson_nano/jetson-inference/build/aarch64/bin/')
+#import detectnet
+
 from prettytable import PrettyTable
-#from torch.autograd import Variable
-
-
 from tqdm import tqdm
-#from soft import simplify 
 from vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
 from loaders import *
 from vision.ssd.config import mobilenetv1_ssd_config
 from vision.nn.multibox_loss import MultiboxLoss
 from train_ssd.train_ssd import test
 from torch import nn
+#from ..jetson_benchmarks.benchmarks_pt2.obj_detection_ssd_custom_utils import get_fps
+
+#from torch import fx
+#from torch.autograd import Variable
+#from soft import simplify 
 #from soft.simplify.utils import get_bn_folding, get_pinned_out, get_pinned
 #from soft.simplify import remove_zeroed
 #from soft.simplify.remove import remove_zeroed
@@ -231,18 +238,23 @@ def get_plot(method, index):
 
 #Converting pruned model in onnx format
 
-def convert_model(directory):
+def convert_models():
     path_models = './models/pruned/'
-    dir_input = path_models+directory
-    dir_output = dir_input + '/' + "onnx"
 
-    if not os.path.exists(dir_output):
-        os.makedirs(dir_output)
-    else:
-        os.removedirs(dir_output)
-        os.makedirs(dir_output)
+    with tqdm(total=(len(os.listdir(path_models+methods[0]))-1)*len(methods), file=sys.stdout) as pbar:
+        for i in range(0,3):
+            directory = methods[i]
 
-    with tqdm(total=(len(os.listdir(dir_input))-1)*len(methods), file=sys.stdout) as pbar: 
+        dir_input = path_models+directory
+        dir_output = dir_input + '/' + "onnx"
+
+        if not os.path.exists(dir_output):
+            os.makedirs(dir_output)
+        else:
+            os.removedirs(dir_output)
+            os.makedirs(dir_output)
+
+        print("Converting models...")
         for i in range(0, 105, 5):
             logging.disable(logging.CRITICAL)
             sys.stdout = open(os.devnull, 'w')
@@ -255,6 +267,53 @@ def convert_model(directory):
             sys.stdout = sys.__stdout__
             pbar.update(1)
 
-for i in range(0,3):
-    convert_model(methods[i])
+#convert_models()
 
+#test performance
+
+def get_models(method, dir):
+    files = []
+    dir_input = './models/pruned/'+method+'/'+dir
+    for i in range(0, 105, 5):
+        model_path_pth = dir_input+"/"+str(i)+'%_'+method+'_pruned_model.'+dir
+        files.append(model_path_pth)
+    return files
+    
+for i in range(2,3):
+    input_list = [
+        #"video/240p_60fps.mp4",
+        #"video/360p_30fps.mp4"
+        #"video/480p_30fps.mp4",
+        #"video/720p_30fps.mp4",
+        # "video/1080p_30fps.mp4",
+        # "video/1080p_60fps.mp4",
+        "csi://0"
+        #"/dev/video1"
+    ]
+    output = "display://0"
+    networks_list = get_models(methods[i], 'onnx')
+    #half_list_net = [networks_list[i] for i in range(0, int(len(networks_list)/2))]
+    operation = './benchmarks/'+methods[i]
+    labels = './models/pruned/labels.txt'
+    print("Get FPS for " + methods[i] + " method...")
+
+    #cmd = 'cd /home/flavio/thesis/jetson_nano/jetson-inference/build/aarch64/bin/;'
+    #cmd2 = 'python3 detectnet.py --model=/home/flavio/thesis/jetson_nano/Pruning/models/pruned/unstructured/onnx/50%_unstructured_pruned_model.onnx --labels=/home/flavio/thesis/jetson_nano/Pruning/models/pruned/labels.txt --input-blob=input_0 --output-cvg=scores --output-bbox=boxes /home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/test /home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/result'
+    
+    #sts = os.system(cmd+cmd2)
+    # sts2 = sp.Popen(cmd+cmd2, shell=True, stdout=subprocess.PIPE).stdout
+    # info = sts2.read()
+    # print(type(info))
+    # print(type(info.decode()))
+    # print(info.decode())
+    dataframe, filename = get_fps(input_list, output, networks_list, labels)
+    path_dataset = operation+'/'+filename
+    dataframe.to_csv(operation+'/'+filename)
+    # if not os.path.exists(path_dataset):
+    #         with open(path_dataset, "rb") as f:
+    #             dataframe_old = pickle.load(f)
+
+    # else:
+    #     dataframe.to_csv(operation+'/'+filename)
+
+    
