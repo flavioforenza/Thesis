@@ -12,3 +12,5 @@ ckpt/*
 *.caffemodel
 *.json
 *.pth
+*.csv
+*.pyc
