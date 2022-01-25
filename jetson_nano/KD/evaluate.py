@@ -20,7 +20,7 @@ def evaluate(model_type='student', prefix='student'):
         model = MobileNetV1_Stud(8)
        
     model_paths = []
-    for epoch_count in range(0, 99, 1):
+    for epoch_count in range(0, 301, 1):
         model_paths.append(os.path.join(CHECKPOINTS_DIR, '{}-{}.pth'.format(prefix, epoch_count+1)))
     #model_paths.append(os.path.join(MODEL_DIR, '{}.pth'.format(prefix)))
     
@@ -67,13 +67,13 @@ def evaluate(model_type='student', prefix='student'):
 
 # Evaluate accuracy
 #error_counts_teacher = evaluate('teacher', 'teacher')
-#error_counts_student = evaluate('student', 'student')
+error_counts_student = evaluate('student', 'student')
 # error_counts_student_distill = evaluate('student', 'student-distill')
 # error_counts_teacher_distill = evaluate('teacher', 'teacher-distill')
 
 # Store as file
 # np.save('./data/error_counts_teacher.npy', error_counts_teacher)
-# np.save('./results/error_counts_student.npy', error_counts_student)
+np.save('./results/error_counts_student.npy', error_counts_student)
 # np.save('./data/error_counts_student_distill.npy', error_counts_student_distill)
 # np.save('./data/error_counts_teacher_distill.npy', error_counts_teacher_distill)
 
@@ -88,7 +88,7 @@ fig, ax = plt.subplots()
 
 # Plot error
 #ax.plot(range(0, 3001, 100), error_counts_teacher, label='teacher')
-ax.plot(range(0, 99, 1), error_counts_student, label='student')
+ax.plot(range(0, 301, 1), error_counts_student, label='student')
 #ax.plot(range(0, 3001, 100), error_counts_student_distill, label='student with distillation')
 #ax.plot(range(0, 3001, 100), error_counts_teacher_distill, label='teacher with distillation')
 ax.set_xlabel('number of epochs')
