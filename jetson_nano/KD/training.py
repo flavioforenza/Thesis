@@ -205,22 +205,29 @@ def main_worker(gpu, ngpus_per_node, args):
         print("=> creating model '{}'".format(args.arch))
         if args.arch.startswith('mobilenet'):
             #check if teacher model exists
-            if not os.path.exists('./model/teacher.pth'):
-                print("Teacher doesn't exist. Creating teacher model...")
-                # extract base_net from pre-trained ssd-mobilenet
-                path_preTrain_model = '/home/flavio/thesis/jetson_nano/Pruning/models/checkpoints/mb1-1000.pth'
-                ssd_model = create_mobilenetv1_ssd
-                ssd_net = ssd_model(num_classes+1)
-                ssd_net.load(path_preTrain_model)
-        
-                #create a virgin mobilenet
-                model = Net(num_classes)
-                #load weigths, bias etc from old pretrained model in the new model.
-                model.model.load_state_dict(ssd_net.base_net.state_dict())
-                torch.save(model.state_dict(), './model/teacher.pth')
+            path_teacher = './model/teacher.pth'
+            path_student = './model/student.pth'
+            path_model = path_student
+            if os.path.exists(path_model):
+                if 'teacher' in path_model:
+                    print("Teacher doesn't exist. Creating teacher model...")
+                    # extract base_net from pre-trained ssd-mobilenet
+                    path_preTrain_model = '/home/flavio/thesis/jetson_nano/Pruning/models/checkpoints/mb1-1000.pth'
+                    ssd_model = create_mobilenetv1_ssd
+                    ssd_net = ssd_model(num_classes+1)
+                    ssd_net.load(path_preTrain_model)
+            
+                    #create a virgin mobilenet
+                    model = Net(num_classes)
+                    #load weigths, bias etc from old pretrained model in the new model.
+                    model.model.load_state_dict(ssd_net.base_net.state_dict())
+                    model_name = 'teacher'
+                    torch.save(model.state_dict(), path_teacher)
             else:
-                model = Net(num_classes)
-                model.load_state_dict(torch.load('./model/teacher.pth', map_location=lambda storage, loc: storage))
+                model = MobileNetV1_Stud(num_classes)
+                model_name = 'student'
+                torch.save(model.state_dict(), path_model)
+                    #model.load_state_dict(torch.load('./model/teacher.pth', map_location=lambda storage, loc: storage))
             #model = models.__dict__[args.arch]()
 
     # reshape the model for the number of classes in the dataset
@@ -308,6 +315,8 @@ def main_worker(gpu, ngpus_per_node, args):
         if not args.multiprocessing_distributed or (args.multiprocessing_distributed
                 and args.rank % ngpus_per_node == 0):
             save_checkpoint({
+                'model': model,
+                'model_name': model_name,
                 'epoch': epoch + 1,
                 'arch': args.arch,
                 'resolution': args.resolution,
@@ -445,14 +454,16 @@ def save_checkpoint(state, is_best, args, filename='checkpoint.pth', best_filena
         best_filename = os.path.join(model_path, best_filename)
 
     # save the checkpoint
-    torch.save(state, './checkpoints/'+filename)
+    path_checkpoint = './checkpoints/'
+    path_to_save = state['model_name']+'-{}.pth'.format(state['epoch'])
+    torch.save(state['model'], path_checkpoint+path_to_save)
 
     # earmark the best checkpoint
     if is_best:
-        shutil.copyfile('./checkpoints/'+filename, './best_model/'+best_filename)
-        print("saved best model to:  " + './best_model/'+best_filename)
+        shutil.copyfile(path_checkpoint+path_to_save, './best_model/'+path_to_save)
+        print("saved best model to:  " + './best_model/'+path_to_save)
     else:
-        print("saved checkpoint to:  " + './checkpoints/'+filename)
+        print("saved checkpoint to:  " + path_checkpoint+path_to_save)
 
 
 #
