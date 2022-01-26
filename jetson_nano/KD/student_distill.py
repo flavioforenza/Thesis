@@ -12,7 +12,7 @@ import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
 
 from mobilenet import Net
-from training import AverageMeter, ProgressMeter, accuracy
+from training import AverageMeter, ProgressMeter, accuracy, save_checkpoint
 from models import MobileNetV1_Stud, MobileNetV1_Teach
 
 class CrossEntropyLossForSoftTarget(nn.Module):
@@ -44,6 +44,7 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
     epoch_start = time.time()
     end = epoch_start
 
+    total_loss = 0.0
     # train over each image batch from the dataset
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
@@ -71,6 +72,20 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
         loss.backward()
         optimizer.step()
 
+        # Clip weight
+        # max_norm = 15.0
+        # named_parameters = dict(student_model.named_parameters())
+        # for layer_name in ['layer1', 'layer2', 'layer3']:
+        #     with torch.no_grad():
+        #         weight = named_parameters['{}.weight'.format(layer_name)]
+        #         bias = named_parameters['{}.bias'.format(layer_name)].unsqueeze(1)
+        #         weight_bias = torch.cat((weight, bias),dim=1)
+        #         norm = torch.norm(weight_bias, dim=1, keepdim=True).add_(1e-6)
+        #         clip_coef = norm.reciprocal_().mul_(max_norm).clamp_(max=1.0)
+        #         weight.mul_(clip_coef)
+        #         bias.mul_(clip_coef)
+
+        total_loss += loss.item()
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
@@ -80,6 +95,8 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
     
     print("Epoch: [{:d}] completed, elapsed time {:6.3f} seconds".format(epoch, time.time() - epoch_start))
 
+    
+
 
 #DATASET_DIR = '../mnist/'
 
@@ -87,8 +104,9 @@ device = torch.device('cuda')
 print(device)
 
 # Load the best teacher model
-teacher_model = MobileNetV1_Teach(8)
-teacher_model.load_state_dict(torch.load('./model/teacher.pth'))
+teacher_model = torch.load('./model/teacher-180.pth')
+#teacher_model = Net(8)
+#teacher_model.load_state_dict(torch.load('./model/teacher-180.pth'))
 teacher_model.eval()
 
 student_model = MobileNetV1_Stud(8)
@@ -142,5 +160,22 @@ if gpu is not None:
     student_model = student_model.cuda(gpu)
     teacher_model = student_model.cuda(gpu)
 
-train(train_loader, student_model, criterion, optimizer, '1000', num_classes, teacher_model)
+for epoch in range(0, 1000):
+    train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model)
+
+    
+    # save_checkpoint({
+    #     'model': model,
+    #     'model_name': model_name,
+    #     'epoch': epoch + 1,
+    #     'arch': args.arch,
+    #     'resolution': args.resolution,
+    #     'num_classes': num_classes,
+    #     'state_dict': model.state_dict(),
+    #     'optimizer' : optimizer.state_dict(),
+    # }, args)
+
+    # remember best acc@1 and save checkpoint
+    #is_best = acc1 > best_acc1
+    #best_acc1 = max(acc1, best_acc1)
 

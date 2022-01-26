@@ -40,14 +40,18 @@ class Net(nn.Module):
             conv_dw(512, 512, 1),
             conv_dw(512, 1024, 2),
             conv_dw(1024, 1024, 1),
-            #nn.AvgPool2d(7),
         )
         self.fc = nn.Linear(1024, num_classes)
+        self.dropout_20 = nn.Dropout(0.2)
+        self.dropout_50 = nn.Dropout(0.5)
 
     def forward(self, x):
+        x = self.dropout_20(x)
         x = self.model(x)
+        x = self.dropout_50(x)
         #added from jetson repo
         x = F.avg_pool2d(x, 7)
         x = x.view(-1, 1024)
+        x = self.dropout_50(x)
         x = self.fc(x)
         return x

@@ -29,7 +29,7 @@ import torchvision.models as models
 from mobilenet import Net
 from train_sd.vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
 
-from models import MobileNetV1_Stud
+from models import MobileNetV1_Stud, MobileNetV1_Teach
 
 #from reshape import reshape_model
 
@@ -207,8 +207,8 @@ def main_worker(gpu, ngpus_per_node, args):
             #check if teacher model exists
             path_teacher = './model/teacher.pth'
             path_student = './model/student.pth'
-            path_model = path_student
-            if os.path.exists(path_model):
+            path_model = path_teacher
+            if not os.path.exists(path_model):
                 if 'teacher' in path_model:
                     print("Teacher doesn't exist. Creating teacher model...")
                     # extract base_net from pre-trained ssd-mobilenet
@@ -397,8 +397,6 @@ def validate(val_loader, model, criterion, num_classes, args):
 
     # switch to evaluate mode
     model.eval()
-
-    #classes = ['Bicycle', 'Bus', 'Car', 'Motorcycle', 'Person', 'Traffic_light', 'Traffic_sign', 'Truck']
 
     with torch.no_grad():
         end = time.time()

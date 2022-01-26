@@ -21,9 +21,13 @@ class MobileNetV1_Teach(nn.Module):
                 nn.BatchNorm2d(inp),
                 nn.ReLU(inplace=True),
 
+                nn.Dropout(0.5), #adding dropout
+
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(oup),
                 nn.ReLU(inplace=True),
+
+                nn.Dropout(0.5) #adding dropout
             )
 
         self.model = nn.Sequential(
@@ -43,8 +47,10 @@ class MobileNetV1_Teach(nn.Module):
             conv_dw(1024, 1024, 1),
         )
         self.fc = nn.Linear(1024, num_classes)
+        self.dropout_20 = nn.Dropout(0.2)
 
     def forward(self, x):
+        x = self.dropout_20(x) #dropout
         x = self.model(x)
         x = F.avg_pool2d(x, 7)
         x = x.view(-1, 1024)
