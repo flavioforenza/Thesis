@@ -12,7 +12,8 @@ class MobileNetV1_Teach(nn.Module):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
                 nn.BatchNorm2d(oup),
-                nn.ReLU(inplace=True)
+                nn.ReLU(inplace=True),
+                
             )
 
         def conv_dw(inp, oup, stride):
@@ -20,20 +21,19 @@ class MobileNetV1_Teach(nn.Module):
                 nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
                 nn.BatchNorm2d(inp),
                 nn.ReLU(inplace=True),
-
-                nn.Dropout(0.5), #adding dropout
+                #nn.Dropout(0.1),
 
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(oup),
                 nn.ReLU(inplace=True),
+                #nn.Dropout(0.1),
 
-                nn.Dropout(0.5) #adding dropout
             )
 
         self.model = nn.Sequential(
-            conv_bn(3, 32, 2),
-            conv_dw(32, 64, 1),
-            conv_dw(64, 128, 2),
+            conv_bn(  3,  32, 2), 
+            conv_dw( 32,  64, 1),
+            conv_dw( 64, 128, 2),
             conv_dw(128, 128, 1),
             conv_dw(128, 256, 2),
             conv_dw(256, 256, 1),
@@ -47,55 +47,63 @@ class MobileNetV1_Teach(nn.Module):
             conv_dw(1024, 1024, 1),
         )
         self.fc = nn.Linear(1024, num_classes)
-        self.dropout_20 = nn.Dropout(0.2)
+        #self.dropout_20 = nn.Dropout(0.2)
+        #self.dropout_50 = nn.Dropout(0.5)
 
     def forward(self, x):
-        x = self.dropout_20(x) #dropout
+        #x = self.dropout_20(x)
         x = self.model(x)
+        #x = self.dropout_50(x)
+        #added from jetson repo
         x = F.avg_pool2d(x, 7)
         x = x.view(-1, 1024)
+        #x = self.dropout_50(x)
         x = self.fc(x)
         return x
 
 class MobileNetV1_Stud(nn.Module):
-    def __init__(self, num_classes=1024):
+    def __init__(self, num_classes=512):
         super(MobileNetV1_Stud, self).__init__()
 
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
-                nn.BatchNorm2d(oup),
+                #nn.BatchNorm2d(oup),
                 nn.ReLU(inplace=True)
             )
 
         def conv_dw(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
-                nn.BatchNorm2d(inp),
+                #nn.BatchNorm2d(inp),
                 nn.ReLU(inplace=True),
 
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
-                nn.BatchNorm2d(oup),
+                #nn.BatchNorm2d(oup),
                 nn.ReLU(inplace=True),
             )
 
         self.model = nn.Sequential(
-            conv_bn(3, 32, 2),
-            conv_dw(32, 64, 1),
+            conv_bn(3, 16, 2),
+            conv_dw(16, 32, 1),
+            conv_dw(32, 64, 2),
+            conv_dw(64, 64, 1),
             conv_dw(64, 128, 2),
             conv_dw(128, 128, 1),
             conv_dw(128, 256, 2),
             conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
             conv_dw(256, 512, 2),
             conv_dw(512, 512, 1),
-            conv_dw(512, 1024, 2),
-            conv_dw(1024, 1024, 1),
         )
-        self.fc = nn.Linear(1024, num_classes)
+        self.fc = nn.Linear(512, num_classes)
 
     def forward(self, x):
         x = self.model(x)
         x = F.avg_pool2d(x, 7)
-        x = x.view(-1, 1024)
+        x = x.view(-1, 512)
         x = self.fc(x)
         return x

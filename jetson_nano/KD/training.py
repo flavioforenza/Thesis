@@ -57,7 +57,7 @@ parser.add_argument('--resolution', default=224, type=int, metavar='N',
                          'note than Inception models should use 299x299')
 parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
                     help='number of data loading workers (default: 2)')
-parser.add_argument('--epochs', default=1, type=int, metavar='N',
+parser.add_argument('--epochs', default=1000, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -96,6 +96,9 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
+parser.add_argument('--resume', default='./model/teacher600.pth', type=str, metavar='PATH',
+                    help='path to latest checkpoint (default: none)')
+
 
 best_acc1 = 0
 
@@ -198,9 +201,22 @@ def main_worker(gpu, ngpus_per_node, args):
         num_workers=args.workers, pin_memory=True)
 
     # create or load the model if using pre-trained (the default)
-    if args.pretrained:
-        print("=> using pre-trained model '{}'".format(args.arch))
-        model = models.__dict__[args.arch](pretrained=True)
+    # optionally resume from a checkpoint
+    if args.resume:
+        if 'teacher' in args.resume:
+            model = MobileNetV1_Teach(num_classes)
+            model_name= 'teacher'
+        else:
+            model = MobileNetV1_Stud(num_classes)
+            model_name= 'student'
+        if os.path.isfile(args.resume):
+            print("=> loading checkpoint '{}'".format(args.resume))
+            checkpoint = torch.load(args.resume)
+            args.start_epoch = 600
+            model.load_state_dict(checkpoint.state_dict())
+            #optimizer.load_state_dict(checkpoint['optimizer'])
+            print("=> loaded checkpoint '{}' (epoch {})"
+                  .format(args.resume, 600))
     else:
         print("=> creating model '{}'".format(args.arch))
         if args.arch.startswith('mobilenet'):
@@ -211,16 +227,16 @@ def main_worker(gpu, ngpus_per_node, args):
             if not os.path.exists(path_model):
                 if 'teacher' in path_model:
                     print("Teacher doesn't exist. Creating teacher model...")
-                    # extract base_net from pre-trained ssd-mobilenet
-                    path_preTrain_model = '/home/flavio/thesis/jetson_nano/Pruning/models/checkpoints/mb1-1000.pth'
-                    ssd_model = create_mobilenetv1_ssd
-                    ssd_net = ssd_model(num_classes+1)
-                    ssd_net.load(path_preTrain_model)
+                    # # extract base_net from pre-trained ssd-mobilenet
+                    # path_preTrain_model = '/home/flavio/thesis/jetson_nano/Pruning/models/checkpoints/mb1-1000.pth'
+                    # ssd_model = create_mobilenetv1_ssd
+                    # ssd_net = ssd_model(num_classes+1)
+                    # ssd_net.load(path_preTrain_model)
             
                     #create a virgin mobilenet
-                    model = Net(num_classes)
+                    model = MobileNetV1_Teach(num_classes)
                     #load weigths, bias etc from old pretrained model in the new model.
-                    model.model.load_state_dict(ssd_net.base_net.state_dict())
+                    #model.model.load_state_dict(ssd_net.base_net.state_dict())
                     model_name = 'teacher'
                     torch.save(model.state_dict(), path_teacher)
             else:
@@ -270,23 +286,6 @@ def main_worker(gpu, ngpus_per_node, args):
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
-    # optionally resume from a checkpoint
-    # if args.resume:
-    #     if os.path.isfile(args.resume):
-    #         print("=> loading checkpoint '{}'".format(args.resume))
-    #         checkpoint = torch.load(args.resume)
-    #         args.start_epoch = checkpoint['epoch']
-    #         best_acc1 = checkpoint['best_acc1']
-    #         if args.gpu is not None:
-    #             # best_acc1 may be from a checkpoint from a different GPU
-    #             best_acc1 = best_acc1.to(args.gpu)
-    #         model.load_state_dict(checkpoint['state_dict'])
-    #         optimizer.load_state_dict(checkpoint['optimizer'])
-    #         print("=> loaded checkpoint '{}' (epoch {})"
-    #               .format(args.resume, checkpoint['epoch']))
-    #     else:
-    #         print("=> no checkpoint found at '{}'".format(args.resume))
-
     cudnn.benchmark = True
 
     # if in evaluation mode, only run validation
@@ -309,7 +308,6 @@ def main_worker(gpu, ngpus_per_node, args):
         acc1 = validate(val_loader, model, criterion, num_classes, args)
 
         # remember best acc@1 and save checkpoint
-        is_best = acc1 > best_acc1
         best_acc1 = max(acc1, best_acc1)
 
         if not args.multiprocessing_distributed or (args.multiprocessing_distributed
@@ -324,7 +322,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 'state_dict': model.state_dict(),
                 'best_acc1': best_acc1,
                 'optimizer' : optimizer.state_dict(),
-            }, is_best, args)
+            })
 
 
 #
@@ -438,30 +436,20 @@ def validate(val_loader, model, criterion, num_classes, args):
 #
 # save model checkpoint
 #
-def save_checkpoint(state, is_best, args, filename='checkpoint.pth', best_filename='model_best.pth'):
+def save_checkpoint(state):
     """Save a model checkpoint file, along with the best-performing model if applicable"""
-
-    # if saving to an output directory, make sure it exists
-    if args.model_dir:
-        model_path = os.path.expanduser(args.model_dir)
-
-        if not os.path.exists(model_path):
-            os.mkdir(model_path)
-
-        filename = os.path.join(model_path, filename)
-        best_filename = os.path.join(model_path, best_filename)
 
     # save the checkpoint
     path_checkpoint = './checkpoints/'
     path_to_save = state['model_name']+'-{}.pth'.format(state['epoch'])
     torch.save(state['model'], path_checkpoint+path_to_save)
 
-    # earmark the best checkpoint
-    if is_best:
-        shutil.copyfile(path_checkpoint+path_to_save, './best_model/'+path_to_save)
-        print("saved best model to:  " + './best_model/'+path_to_save)
-    else:
-        print("saved checkpoint to:  " + path_checkpoint+path_to_save)
+    # # earmark the best checkpoint
+    # if is_best:
+    #     shutil.copyfile(path_checkpoint+path_to_save, './best_model/'+path_to_save)
+    #     print("saved best model to:  " + './best_model/'+path_to_save)
+    # else:
+    #     print("saved checkpoint to:  " + path_checkpoint+path_to_save)
 
 
 #

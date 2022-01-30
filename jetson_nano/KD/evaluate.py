@@ -16,12 +16,12 @@ MODEL_DIR = './model'
 
 def evaluate(model_type='student', prefix='student'):
     if model_type == 'teacher':
-        model = Net(8)
+        model = MobileNetV1_Teach(8)
     elif model_type == 'student':
         model = MobileNetV1_Stud(8)
        
     model_paths = []
-    for epoch_count in range(0, 338, 1):
+    for epoch_count in range(0, 1000, 1):
         model_paths.append(os.path.join(CHECKPOINTS_DIR, '{}-{}.pth'.format(prefix, epoch_count+1)))
     #model_paths.append(os.path.join(MODEL_DIR, '{}.pth'.format(prefix)))
     
@@ -67,31 +67,42 @@ def evaluate(model_type='student', prefix='student'):
     return error_counts
 
 # Evaluate accuracy
-error_counts_teacher = evaluate('teacher', 'teacher')
+#error_counts_teacher = evaluate('teacher', 'teacher')
 #error_counts_student = evaluate('student', 'student')
 # error_counts_student_distill = evaluate('student', 'student-distill')
 # error_counts_teacher_distill = evaluate('teacher', 'teacher-distill')
 
 # Store as file
-np.save('./data/error_counts_teacher.npy', error_counts_teacher)
-#np.save('./results/error_counts_student.npy', error_counts_student)
+#np.save('./data/error_counts_teacher_10Drop.npy', error_counts_teacher)
+#np.save('./results/error_counts_student_distill.npy', error_counts_student)
 # np.save('./data/error_counts_student_distill.npy', error_counts_student_distill)
 # np.save('./data/error_counts_teacher_distill.npy', error_counts_teacher_distill)
 
 # # Load from file
-#error_counts_teacher = np.load('./data/error_counts_teacher.npy')
-error_counts_student = np.load('./results/error_counts_student.npy')
+#error_counts_teacher = np.load('./data/error_counts_teacher_10Drop.npy')
+error_counts_student = np.load('./results/error_counts_student_distill.npy'
+
+)
 #error_counts_student_distill = np.load('./data/error_counts_student_distill.npy')
 #error_counts_teacher_distill = np.load('./data/error_counts_teacher_distill.npy')
+
+print("Minimo errore: ", min(error_counts_student))
+print("Massimo errore: ", max(error_counts_student))
 
 # Prepare to plot
 fig, ax = plt.subplots()
 
 # Plot error
 #ax.plot(range(0, 3001, 100), error_counts_teacher, label='teacher')
-lst_y = [error_counts_student[x] for x in range(0,1000,99)]
-lst_x = [x for x in range(0,1001,100)]
-ax.plot(lst_x, lst_y, label='student')
+#0,1000,99
+#print(len(error_counts_teacher))
+lst_y = [error_counts_student[x] for x in range(0,1000, 1)]
+print(len(lst_y))
+#0,1001,100
+lst_x = [x for x in range(0,1000, 1)]
+print(len(lst_x))
+name_img = 'student_distill_T20'
+ax.plot(lst_x, lst_y, label=name_img)
 #ax.plot(range(0, 3001, 100), error_counts_student_distill, label='student with distillation')
 #ax.plot(range(0, 3001, 100), error_counts_teacher_distill, label='teacher with distillation')
 ax.set_xlabel('number of epochs')
@@ -101,4 +112,4 @@ ax.legend()
 
 # Show
 #plt.show()
-plt.savefig('learning_curve.png')
+plt.savefig(name_img+'.png')

@@ -11,7 +11,9 @@ class Net(nn.Module):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
                 nn.BatchNorm2d(oup),
-                nn.ReLU(inplace=True)
+                nn.ReLU(inplace=True),
+                
+                nn.Dropout(0.5),
             )
 
         def conv_dw(inp, oup, stride):
@@ -19,10 +21,13 @@ class Net(nn.Module):
                 nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
                 nn.BatchNorm2d(inp),
                 nn.ReLU(inplace=True),
-    
+                nn.Dropout(0.5),
+
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(oup),
                 nn.ReLU(inplace=True),
+                nn.Dropout(0.5),
+
             )
 
         self.model = nn.Sequential(
@@ -43,15 +48,15 @@ class Net(nn.Module):
         )
         self.fc = nn.Linear(1024, num_classes)
         self.dropout_20 = nn.Dropout(0.2)
-        self.dropout_50 = nn.Dropout(0.5)
+        #self.dropout_50 = nn.Dropout(0.5)
 
     def forward(self, x):
         x = self.dropout_20(x)
         x = self.model(x)
-        x = self.dropout_50(x)
+        #x = self.dropout_50(x)
         #added from jetson repo
         x = F.avg_pool2d(x, 7)
         x = x.view(-1, 1024)
-        x = self.dropout_50(x)
+        #x = self.dropout_50(x)
         x = self.fc(x)
         return x

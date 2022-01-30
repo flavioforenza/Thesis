@@ -164,16 +164,16 @@ for epoch in range(0, 1000):
     train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model)
 
     
-    # save_checkpoint({
-    #     'model': model,
-    #     'model_name': model_name,
-    #     'epoch': epoch + 1,
-    #     'arch': args.arch,
-    #     'resolution': args.resolution,
-    #     'num_classes': num_classes,
-    #     'state_dict': model.state_dict(),
-    #     'optimizer' : optimizer.state_dict(),
-    # }, args)
+    save_checkpoint({
+        'model': student_model,
+        'model_name': 'student',
+        'epoch': epoch + 1,
+        'arch': 'mobielent',
+        'resolution': 224,
+        'num_classes': num_classes,
+        'state_dict': student_model.state_dict(),
+        'optimizer' : optimizer.state_dict(),
+    })
 
     # remember best acc@1 and save checkpoint
     #is_best = acc1 > best_acc1
