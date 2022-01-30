@@ -10,10 +10,47 @@ import os
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
+import argparse
 
-from mobilenet import Net
+
+from training import adjust_learning_rate, validate
 from training import AverageMeter, ProgressMeter, accuracy, save_checkpoint
 from models import MobileNetV1_Stud, MobileNetV1_Teach
+
+parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+
+parser.add_argument('--data', metavar='DIR', default='./data/',
+                    help='path to dataset')
+parser.add_argument('--model-dir', type=str, default='', 
+				help='path to desired output directory for saving model '
+					'checkpoints (default: current directory)')
+parser.add_argument('--resolution', default=224, type=int, metavar='N',
+                    help='input NxN image resolution of model (default: 224x224) '
+                         'note than Inception models should use 299x299')
+parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
+                    help='number of data loading workers (default: 2)')
+parser.add_argument('--epochs', default=1000, type=int, metavar='N',
+                    help='number of total epochs to run')
+parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
+                    help='manual epoch number (useful on restarts)')
+parser.add_argument('-b', '--batch-size', default=8, type=int,
+                    metavar='N',
+                    help='mini-batch size (default: 8), this is the total '
+                         'batch size of all GPUs on the current node when '
+                         'using Data Parallel or Distributed Data Parallel')
+parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
+                    metavar='LR', help='initial learning rate', dest='lr')
+parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
+                    help='momentum')
+parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
+                    metavar='W', help='weight decay (default: 1e-4)',
+                    dest='weight_decay')
+parser.add_argument('-p', '--print-freq', default=10, type=int,
+                    metavar='N', help='print frequency (default: 10)')
+parser.add_argument('--gpu', default=0, type=int,
+                    help='GPU id to use.')
+                    
+best_acc1 = 0
 
 class CrossEntropyLossForSoftTarget(nn.Module):
     def __init__(self, T=20):
@@ -26,7 +63,7 @@ class CrossEntropyLossForSoftTarget(nn.Module):
         y_gt_soft = y_gt.div(self.T)
         return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.T*self.T)
 
-def train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model):
+def train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model, args):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -44,15 +81,15 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
     epoch_start = time.time()
     end = epoch_start
 
-    total_loss = 0.0
+    #total_loss = 0.0
     # train over each image batch from the dataset
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
-        gpu = 0
-        images = images.cuda(gpu, non_blocking=True)
-        target = target.cuda(gpu, non_blocking=True)
+        if args.gpu is not None:
+            images = images.cuda(args.gpu, non_blocking=True)
+            target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
         output_student = student_model(images)
@@ -85,18 +122,18 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
         #         weight.mul_(clip_coef)
         #         bias.mul_(clip_coef)
 
-        total_loss += loss.item()
+        #total_loss += loss.item()
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % 10 == 0:
+        if i % args.print_freq == 0:
             progress.display(i)
     
     print("Epoch: [{:d}] completed, elapsed time {:6.3f} seconds".format(epoch, time.time() - epoch_start))
 
     
-
+args = parser.parse_args()
 
 #DATASET_DIR = '../mnist/'
 
@@ -104,31 +141,35 @@ device = torch.device('cuda')
 print(device)
 
 # Load the best teacher model
-teacher_model = torch.load('./model/teacher-180.pth')
+teacher_model = torch.load('./model/teacher600.pth')
 #teacher_model = Net(8)
 #teacher_model.load_state_dict(torch.load('./model/teacher-180.pth'))
 teacher_model.eval()
 
 student_model = MobileNetV1_Stud(8)
 
-criterion = nn.CrossEntropyLoss(reduction='mean')
+criterion = nn.CrossEntropyLoss().cuda(0)
 criterion_soft = CrossEntropyLossForSoftTarget()
 
-optimizer = optim.SGD(student_model.parameters(), lr=0.1)
+optimizer = torch.optim.SGD(student_model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
 
-lr_init = 0.1
-gamma = 0.998
-lrs = np.zeros(shape=(1000,))
-lr = lr_init
+#optimizer = optim.SGD(student_model.parameters(), lr=0.1)
 
-for step in range(1000):
-    lrs[step] = lr
-    lr *= gamma
-momentums = np.concatenate([np.linspace(0.5, 0.99, 500), np.full(shape=(2500,), fill_value=0.99)])
-list_lr_momentum_scheduler = scheduler.ListScheduler(optimizer, lrs=lrs, momentums=momentums)
+# gamma = 0.998
+# lrs = np.zeros(shape=(1000,))
+# lr = lr_init
 
+# for step in range(1000):
+#     lrs[step] = lr
+#     lr *= gamma
+# momentums = np.concatenate([np.linspace(0.5, 0.99, 500), np.full(shape=(2500,), fill_value=0.99)])
+# list_lr_momentum_scheduler = scheduler.ListScheduler(optimizer, lrs=lrs, momentums=momentums)
 
 traindir = os.path.join('./data/', 'train')
+valdir = os.path.join('./data/', 'val')
+
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                     std=[0.229, 0.224, 0.225])
 
@@ -151,6 +192,16 @@ train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=8, shuffle=(train_sampler is None),
         num_workers=2, pin_memory=True, sampler=train_sampler)
 
+val_loader = torch.utils.data.DataLoader(
+        datasets.ImageFolder(valdir, transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize,
+        ])),
+        batch_size=8, shuffle=False,
+        num_workers=2, pin_memory=True)
+
 cudnn.benchmark = True
 
 student_model.train()
@@ -161,18 +212,19 @@ if gpu is not None:
     teacher_model = student_model.cuda(gpu)
 
 for epoch in range(0, 1000):
-    train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model)
+    adjust_learning_rate(optimizer, epoch, args)
+    train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model, args)
 
-    
+    # evaluate on validation set
+    acc1 = validate(val_loader, student_model, criterion, num_classes, args)
+
+    # remember best acc@1 and save checkpoint
+    best_acc1 = max(acc1, best_acc1)
+
     save_checkpoint({
         'model': student_model,
-        'model_name': 'student',
-        'epoch': epoch + 1,
-        'arch': 'mobielent',
-        'resolution': 224,
-        'num_classes': num_classes,
-        'state_dict': student_model.state_dict(),
-        'optimizer' : optimizer.state_dict(),
+        'model_name': 'student_distill',
+        'epoch': epoch + 1
     })
 
     # remember best acc@1 and save checkpoint

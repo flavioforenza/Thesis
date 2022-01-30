@@ -21,7 +21,7 @@ def evaluate(model_type='student', prefix='student'):
         model = MobileNetV1_Stud(8)
        
     model_paths = []
-    for epoch_count in range(0, 1000, 1):
+    for epoch_count in range(600, 1000, 1):
         model_paths.append(os.path.join(CHECKPOINTS_DIR, '{}-{}.pth'.format(prefix, epoch_count+1)))
     #model_paths.append(os.path.join(MODEL_DIR, '{}.pth'.format(prefix)))
     
@@ -73,21 +73,19 @@ def evaluate(model_type='student', prefix='student'):
 # error_counts_teacher_distill = evaluate('teacher', 'teacher-distill')
 
 # Store as file
-#np.save('./data/error_counts_teacher_10Drop.npy', error_counts_teacher)
+#np.save('./data/error_counts_teacher_normal2.npy', error_counts_teacher)
 #np.save('./results/error_counts_student_distill.npy', error_counts_student)
 # np.save('./data/error_counts_student_distill.npy', error_counts_student_distill)
 # np.save('./data/error_counts_teacher_distill.npy', error_counts_teacher_distill)
 
 # # Load from file
-#error_counts_teacher = np.load('./data/error_counts_teacher_10Drop.npy')
-error_counts_student = np.load('./results/error_counts_student_distill.npy'
-
-)
+error_counts_teacher = np.load('./results/final_error_counts_teacher_normal.npy')
+#error_counts_student = np.load('./results/error_counts_student_distill.npy')
 #error_counts_student_distill = np.load('./data/error_counts_student_distill.npy')
 #error_counts_teacher_distill = np.load('./data/error_counts_teacher_distill.npy')
 
-print("Minimo errore: ", min(error_counts_student))
-print("Massimo errore: ", max(error_counts_student))
+print("Minimo errore: ", min(error_counts_teacher))
+print("Massimo errore: ", max(error_counts_teacher))
 
 # Prepare to plot
 fig, ax = plt.subplots()
@@ -96,13 +94,13 @@ fig, ax = plt.subplots()
 #ax.plot(range(0, 3001, 100), error_counts_teacher, label='teacher')
 #0,1000,99
 #print(len(error_counts_teacher))
-lst_y = [error_counts_student[x] for x in range(0,1000, 1)]
-print(len(lst_y))
+lst_y_teach = [error_counts_teacher[x-1] for x in range(1,1001, 99)]
+print(len(lst_y_teach))
 #0,1001,100
-lst_x = [x for x in range(0,1000, 1)]
+lst_x = [x for x in range(0,1001, 100)]
 print(len(lst_x))
-name_img = 'student_distill_T20'
-ax.plot(lst_x, lst_y, label=name_img)
+name_img = 'teacher_normal'
+ax.plot(lst_x, lst_y_teach, label='teacher_loss')
 #ax.plot(range(0, 3001, 100), error_counts_student_distill, label='student with distillation')
 #ax.plot(range(0, 3001, 100), error_counts_teacher_distill, label='teacher with distillation')
 ax.set_xlabel('number of epochs')
