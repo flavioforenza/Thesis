@@ -171,18 +171,18 @@ optimizer = torch.optim.SGD(student_model.parameters(), args.lr,
 train_sampler = None
 
 train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=8, shuffle=(train_sampler is None),
-        num_workers=2, pin_memory=True, sampler=train_sampler)
+        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+        num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
 val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose([
             transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.CenterCrop(args.resolution),
             transforms.ToTensor(),
             normalize,
         ])),
-        batch_size=8, shuffle=False,
-        num_workers=2, pin_memory=True)
+        batch_size=args.batch_size, shuffle=False,
+        num_workers=args.workers, pin_memory=True)
 
 cudnn.benchmark = True
 
