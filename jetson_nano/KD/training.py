@@ -52,7 +52,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenet',
                     help='model architecture: ' +
                         ' | '.join(model_names) +
                         ' (default: resnet18)')
-parser.add_argument('--resolution', default=224, type=int, metavar='N',
+parser.add_argument('--resolution', default=128, type=int, metavar='N',
                     help='input NxN image resolution of model (default: 224x224) '
                          'note than Inception models should use 299x299')
 parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
@@ -96,7 +96,7 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
-parser.add_argument('--resume', default='./model/teacher600.pth', type=str, metavar='PATH',
+parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 
 
@@ -172,7 +172,7 @@ def main_worker(gpu, ngpus_per_node, args):
         traindir,
         transforms.Compose([
             #transforms.Resize(224),
-            transforms.RandomResizedCrop(args.resolution),
+            transforms.RandomResizedCrop(args.resolution), #apply the resolution multiplier p
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -216,15 +216,15 @@ def main_worker(gpu, ngpus_per_node, args):
             model.load_state_dict(checkpoint.state_dict())
             #optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
-                  .format(args.resume, 600))
+                  .format(args.resume, args.start_epoch))
     else:
         print("=> creating model '{}'".format(args.arch))
         if args.arch.startswith('mobilenet'):
             #check if teacher model exists
             path_teacher = './model/teacher.pth'
             path_student = './model/student.pth'
-            path_model = path_teacher
-            if not os.path.exists(path_model):
+            path_model = path_student
+            if os.path.exists(path_model):
                 if 'teacher' in path_model:
                     print("Teacher doesn't exist. Creating teacher model...")
                     # # extract base_net from pre-trained ssd-mobilenet
@@ -240,7 +240,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     model_name = 'teacher'
                     torch.save(model.state_dict(), path_teacher)
             else:
-                model = MobileNetV1_Stud(num_classes)
+                model = MobileNetV1_Stud(num_classes, 0.25)
                 model_name = 'student'
                 torch.save(model.state_dict(), path_model)
                     #model.load_state_dict(torch.load('./model/teacher.pth', map_location=lambda storage, loc: storage))

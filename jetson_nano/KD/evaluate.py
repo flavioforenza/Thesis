@@ -18,10 +18,10 @@ def evaluate(model_type='student', prefix='student'):
     if model_type == 'teacher':
         model = MobileNetV1_Teach(8)
     elif model_type == 'student':
-        model = MobileNetV1_Stud(8)
+        model = MobileNetV1_Stud(8, 0.25)
        
     model_paths = []
-    for epoch_count in range(600, 1000, 1):
+    for epoch_count in range(0, 1000, 1):
         model_paths.append(os.path.join(CHECKPOINTS_DIR, '{}-{}.pth'.format(prefix, epoch_count+1)))
     #model_paths.append(os.path.join(MODEL_DIR, '{}.pth'.format(prefix)))
     
@@ -34,7 +34,7 @@ def evaluate(model_type='student', prefix='student'):
     data_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose([
             transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.CenterCrop(128),
             transforms.ToTensor(),
             normalize,
         ])),
@@ -68,24 +68,26 @@ def evaluate(model_type='student', prefix='student'):
 
 # Evaluate accuracy
 #error_counts_teacher = evaluate('teacher', 'teacher')
-#error_counts_student = evaluate('student', 'student')
+error_counts_student = evaluate('student', 'student')
 # error_counts_student_distill = evaluate('student', 'student-distill')
 # error_counts_teacher_distill = evaluate('teacher', 'teacher-distill')
 
 # Store as file
-#np.save('./data/error_counts_teacher_normal2.npy', error_counts_teacher)
-#np.save('./results/error_counts_student_distill.npy', error_counts_student)
-# np.save('./data/error_counts_student_distill.npy', error_counts_student_distill)
-# np.save('./data/error_counts_teacher_distill.npy', error_counts_teacher_distill)
+#np.save('./results/error_counts_teacher_normal2.npy', error_counts_teacher)
+np.save('./results/error_counts_student_0.25_128.npy', error_counts_student)
+# np.save('./results/error_counts_student_distill.npy', error_counts_student_distill)
+# np.save('./results/error_counts_teacher_distill.npy', error_counts_teacher_distill)
 
 # # Load from file
 error_counts_teacher = np.load('./results/final_error_counts_teacher_normal.npy')
-#error_counts_student = np.load('./results/error_counts_student_distill.npy')
-#error_counts_student_distill = np.load('./data/error_counts_student_distill.npy')
-#error_counts_teacher_distill = np.load('./data/error_counts_teacher_distill.npy')
+error_counts_student = np.load('./results/error_counts_student_conv2D_half.npy')
+error_counts_student_2 = np.load('./results/error_counts_student_conv2D_half_NoBatch.npy')
+error_counts_student_3 = np.load('./results/error_counts_student_0.25.npy')
+#error_counts_student_distill = np.load('./results/error_counts_student_distill.npy')
+#error_counts_teacher_distill = np.load('./results/error_counts_teacher_distill.npy')
 
-print("Minimo errore: ", min(error_counts_teacher))
-print("Massimo errore: ", max(error_counts_teacher))
+print("Minimo errore: ", min(error_counts_student_3))
+print("Massimo errore: ", max(error_counts_student_3))
 
 # Prepare to plot
 fig, ax = plt.subplots()
@@ -96,12 +98,18 @@ fig, ax = plt.subplots()
 #print(len(error_counts_teacher))
 lst_y_teach = [error_counts_teacher[x-1] for x in range(1,1001, 99)]
 print(len(lst_y_teach))
+lst_y_stud = [error_counts_student[x-1] for x in range(1,1001, 99)]
+lst_y_stud_2 = [error_counts_student_2[x-1] for x in range(1,1001, 99)]
+lst_y_stud_3 = [error_counts_student_3[x-1] for x in range(1,1001, 99)]
+print(len(lst_y_stud_3))
 #0,1001,100
 lst_x = [x for x in range(0,1001, 100)]
 print(len(lst_x))
-name_img = 'teacher_normal'
-ax.plot(lst_x, lst_y_teach, label='teacher_loss')
-#ax.plot(range(0, 3001, 100), error_counts_student_distill, label='student with distillation')
+name_img = 'all'
+ax.plot(lst_x, lst_y_teach, label='tch_loss')
+ax.plot(lst_x, lst_y_stud, label='std_C2DH_loss')
+ax.plot(lst_x, lst_y_stud_2, label='std_C2DHNB_loss')
+ax.plot(lst_x, lst_y_stud_3, label='std_0.25_loss')
 #ax.plot(range(0, 3001, 100), error_counts_teacher_distill, label='teacher with distillation')
 ax.set_xlabel('number of epochs')
 ax.set_ylabel('number of errors')

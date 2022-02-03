@@ -61,8 +61,16 @@ class MobileNetV1_Teach(nn.Module):
         x = self.fc(x)
         return x
 
+alpha=1
+p = 1
+
 class MobileNetV1_Stud(nn.Module):
-    def __init__(self, num_classes=512):
+    def __init__(self, num_classes=512, wm=1, rm=1):
+        alpha = wm
+        p = rm
+        print("Alpha: ", alpha)
+        print("p: ", p)
+
         super(MobileNetV1_Stud, self).__init__()
 
         def conv_bn(inp, oup, stride):
@@ -84,26 +92,26 @@ class MobileNetV1_Stud(nn.Module):
             )
 
         self.model = nn.Sequential(
-            conv_bn(3, 16, 2),
-            conv_dw(16, 32, 1),
-            conv_dw(32, 64, 2),
-            conv_dw(64, 64, 1),
-            conv_dw(64, 128, 2),
-            conv_dw(128, 128, 1),
-            conv_dw(128, 256, 2),
-            conv_dw(256, 256, 1),
-            conv_dw(256, 256, 1),
-            conv_dw(256, 256, 1),
-            conv_dw(256, 256, 1),
-            conv_dw(256, 256, 1),
-            conv_dw(256, 512, 2),
-            conv_dw(512, 512, 1),
+            conv_bn(  3,  int(32*alpha), 2), 
+            conv_dw( int(32*alpha),  int(64*alpha), 1),
+            conv_dw( int(64*alpha), int(128*alpha), 2),
+            conv_dw(int(128*alpha), int(128*alpha), 1),
+            conv_dw(int(128*alpha), int(256*alpha), 2),
+            conv_dw(int(256*alpha), int(256*alpha), 1),
+            conv_dw(int(256*alpha), int(512*alpha), 2),
+            conv_dw(int(512*alpha), int(512*alpha), 1),
+            conv_dw(int(512*alpha), int(512*alpha), 1),
+            conv_dw(int(512*alpha), int(512*alpha), 1),
+            conv_dw(int(512*alpha), int(512*alpha), 1),
+            conv_dw(int(512*alpha), int(512*alpha), 1),
+            conv_dw(int(512*alpha), int(1024*alpha), 2),
+            conv_dw(int(1024*alpha), int(1024*alpha), 1),
         )
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Linear(int(1024*alpha), num_classes)
 
     def forward(self, x):
         x = self.model(x)
         x = F.avg_pool2d(x, 7)
-        x = x.view(-1, 512)
+        x = x.view(-1, 256)
         x = self.fc(x)
         return x
