@@ -5,10 +5,11 @@ from vision.nn.mobilenet import MobileNetV1
 from vision.ssd.ssd import SSD
 from vision.ssd.predictor import Predictor
 from vision.ssd.config import mobilenetv1_ssd_config as config
+from models import MobileNetV1_Stud
 
-def create_mobilenetv1_ssd(num_classes, path_student_distill, alpha, is_test=False):
-    base_net = torch.load(path_student_distill).model
-    #base_net = MobileNetV1(1001).model  # disable dropout layer
+def create_mobilenetv1_ssd(num_classes, alpha, is_test=False):
+    #base_net = torch.load(path_student_distill).model
+    base_net = MobileNetV1_Stud(num_classes, alpha).model  # disable dropout layer
 
     source_layer_indexes = [
         12,

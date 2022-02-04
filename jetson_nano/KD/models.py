@@ -62,14 +62,11 @@ class MobileNetV1_Teach(nn.Module):
         return x
 
 alpha=1
-p = 1
 
 class MobileNetV1_Stud(nn.Module):
-    def __init__(self, num_classes=512, wm=1, rm=1):
+    def __init__(self, num_classes=512, wm=1):
         alpha = wm
-        p = rm
         print("Alpha: ", alpha)
-        print("p: ", p)
 
         super(MobileNetV1_Stud, self).__init__()
 

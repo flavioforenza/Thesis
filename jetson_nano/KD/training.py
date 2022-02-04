@@ -8,10 +8,7 @@
 import argparse
 import os
 import random
-import shutil
-import time
 import warnings
-import io
 
 import torch
 import torch.nn as nn
@@ -26,7 +23,6 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
-from mobilenet import Net
 from train_sd.vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
 
 from models import MobileNetV1_Stud, MobileNetV1_Teach

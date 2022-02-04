@@ -1,0 +1,9 @@
+BACKGROUND
+Bicycle
+Bus
+Car
+Motorcycle
+Person
+Traffic light
+Traffic sign
+Truck

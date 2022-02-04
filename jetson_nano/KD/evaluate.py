@@ -1,15 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import models
 import torch.utils.data
 import torchvision
 import os
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-
-
 from models import MobileNetV1_Teach, MobileNetV1_Stud
-from mobilenet import Net
 
 CHECKPOINTS_DIR = './checkpoints'
 MODEL_DIR = './model'
