@@ -40,7 +40,7 @@ parser.add_argument('--balance-data', action='store_true',
 # Params for network
 parser.add_argument('--net', default="mb1-ssd",
                     help="The network architecture, it can be mb1-ssd, mb1-lite-ssd, mb2-ssd-lite or vgg16-ssd.")
-parser.add_argument('--freeze-base-net', action='store_true',
+parser.add_argument('--freeze-base-net', action='store_false',
                     help="Freeze base net layers.")
 parser.add_argument('--freeze-net', action='store_true',
                     help="Freeze all the layers except the prediction head.")
@@ -48,7 +48,7 @@ parser.add_argument('--mb2-width-mult', default=1.0, type=float,
                     help='Width Multiplifier for MobilenetV2')
 
 # Params for loading pretrained basenet or checkpoints.
-parser.add_argument('--base-net', default='./checkpoints/student_distill-1000.pth', help='Pretrained base model')
+parser.add_argument('--base-net', default='./model/student_distill-1000.pth', help='Pretrained base model')
 parser.add_argument('--pretrained-ssd', default='', type=str, help='Pre-trained base model')
 parser.add_argument('--resume', default=None, type=str,
                     help='Checkpoint state_dict file to resume training from')
