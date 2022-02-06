@@ -73,7 +73,7 @@ def evaluate(model_type='student', prefix='student'):
 
 # Store as file
 #np.save('./results/error_counts_teacher_normal2.npy', error_counts_teacher)
-#np.save('./results/error_counts_student_distill__0.25_224_t=15.npy', error_counts_student)
+#np.save('./results/error_counts_student_distill__0.25_224_t=2.npy', error_counts_student)
 # np.save('./results/error_counts_student_distill.npy', error_counts_student_distill)
 # np.save('./results/error_counts_teacher_distill.npy', error_counts_teacher_distill)
 
@@ -84,13 +84,16 @@ error_counts_teacher = np.load('./results/final_error_counts_teacher_normal.npy'
 error_counts_student_3 = np.load('./results/error_counts_student_0.25_224.npy')
 error_counts_student_4 = np.load('./results/error_counts_student_0.25_128.npy')
 error_counts_student_distill_0_24_224_t1 = np.load('./results/error_counts_student_distill__0.25_224_t=1.npy')
+error_counts_student_distill_0_24_224_t2 = np.load('./results/error_counts_student_distill__0.25_224_t=2.npy')
+error_counts_student_distill_0_24_224_t3 = np.load('./results/error_counts_student_distill__0.25_224_t=3.npy')
 error_counts_student_distill_0_24_224_t5 = np.load('./results/error_counts_student_distill__0.25_224_t=5.npy')
 error_counts_student_distill_0_24_224_t10 = np.load('./results/error_counts_student_distill__0.25_224_t=10.npy')
 error_counts_student_distill_0_24_224_t15 = np.load('./results/error_counts_student_distill__0.25_224_t=15.npy')
+
 #error_counts_teacher_distill = np.load('./results/error_counts_teacher_distill.npy')
 
-print("Minimo errore: ", min(error_counts_student_distill_0_24_224_t15))
-print("Massimo errore: ", max(error_counts_student_distill_0_24_224_t15))
+print("Minimo errore: ", min(error_counts_student_distill_0_24_224_t3))
+print("Massimo errore: ", max(error_counts_student_distill_0_24_224_t3))
 
 # Prepare to plot
 fig, ax = plt.subplots()
@@ -99,24 +102,26 @@ fig, ax = plt.subplots()
 #ax.plot(range(0, 3001, 100), error_counts_teacher, label='teacher')
 #0,1000,99
 #print(len(error_counts_teacher))
-lst_y_teach = [error_counts_teacher[x-1] for x in range(1,1001, 199)]
+lst_y_teach = [error_counts_teacher[x-1] for x in range(1,1001, 249)]
 print(len(lst_y_teach))
 
 #lst_y_stud = [error_counts_student[x-1] for x in range(1,1001, 199)]
 #lst_y_stud_2 = [error_counts_student_2[x-1] for x in range(1,1001, 199)]
-lst_y_stud_3 = [error_counts_student_3[x-1] for x in range(1,1001, 199)]
-lst_y_stud_4 = [error_counts_student_4[x-1] for x in range(1,1001, 199)]
-lst_y_stud_5 = [error_counts_student_distill_0_24_224_t1[x-1] for x in range(1,1001, 199)]
-lst_y_stud_6 = [error_counts_student_distill_0_24_224_t5[x-1] for x in range(1,1001, 199)]
-lst_y_stud_7 = [error_counts_student_distill_0_24_224_t10[x-1] for x in range(1,1001, 199)]
-lst_y_stud_8 = [error_counts_student_distill_0_24_224_t15[x-1] for x in range(1,1001, 199)]
-print(len(lst_y_stud_8))
+lst_y_stud_3 = [error_counts_student_3[x-1] for x in range(1,1001, 249)]
+lst_y_stud_4 = [error_counts_student_4[x-1] for x in range(1,1001, 249)]
+lst_y_stud_5 = [error_counts_student_distill_0_24_224_t1[x-1] for x in range(1,1001, 249)]
+lst_y_stud_6 = [error_counts_student_distill_0_24_224_t5[x-1] for x in range(1,1001, 249)]
+lst_y_stud_7 = [error_counts_student_distill_0_24_224_t10[x-1] for x in range(1,1001, 249)]
+lst_y_stud_8 = [error_counts_student_distill_0_24_224_t15[x-1] for x in range(1,1001, 249)]
+lst_y_stud_9 = [error_counts_student_distill_0_24_224_t2[x-1] for x in range(1,1001, 249)]
+lst_y_stud_10 = [error_counts_student_distill_0_24_224_t3[x-1] for x in range(1,1001, 249)]
+print(len(lst_y_stud_10))
 
 #0,1001,100
-lst_x = [x for x in range(0,1001, 200)]
+lst_x = [x for x in range(0,1001, 250)]
 print(len(lst_x))
 
-name_img = 'student_distill_0.25_224_T15'
+name_img = 'student_distill_0.25_224_T3'
 
 ax.plot(lst_x, lst_y_teach, label='tch_loss')
 #ax.plot(lst_x, lst_y_stud, label='std_C2DH_loss')
@@ -124,9 +129,12 @@ ax.plot(lst_x, lst_y_teach, label='tch_loss')
 ax.plot(lst_x, lst_y_stud_3, label='std_0.25_224loss')
 ax.plot(lst_x, lst_y_stud_4, label='std_0.25_128loss')
 ax.plot(lst_x, lst_y_stud_5, label='std_D_0.25_224_T1')
+ax.plot(lst_x, lst_y_stud_9, label='std_D_0.25_224_T2')
+ax.plot(lst_x, lst_y_stud_10, label='std_D_0.25_224_T3')
 ax.plot(lst_x, lst_y_stud_6, label='std_D_0.25_224_T5')
 ax.plot(lst_x, lst_y_stud_7, label='std_D_0.25_224_T10')
 ax.plot(lst_x, lst_y_stud_8, label='std_D_0.25_224_T15')
+
 #ax.plot(range(0, 3001, 100), error_counts_teacher_distill, label='teacher with distillation')
 
 ax.set_xlabel('number of epochs')

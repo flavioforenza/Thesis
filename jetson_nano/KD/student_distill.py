@@ -203,7 +203,7 @@ for epoch in range(args.start_epoch, args.epochs):
 
     save_checkpoint({
         'model': student_model,
-        'model_name': 'student_distill',
+        'model_name': 'student_distill_T'+criterion_soft.T,
         'epoch': epoch + 1
     })
 
