@@ -67,14 +67,10 @@ def evaluate(model_type='student', prefix='student'):
 # Evaluate accuracy
 #error_counts_teacher = evaluate('teacher', 'teacher')
 #error_counts_student = evaluate('student', 'student_distill')
-# error_counts_student_distill = evaluate('student', 'student-distill')
-# error_counts_teacher_distill = evaluate('teacher', 'teacher-distill')
 
 # Store as file
 #np.save('./results/error_counts_teacher_normal2.npy', error_counts_teacher)
-#np.save('./results/error_counts_student_distill__0.25_224_t=2.npy', error_counts_student)
-# np.save('./results/error_counts_student_distill.npy', error_counts_student_distill)
-# np.save('./results/error_counts_teacher_distill.npy', error_counts_teacher_distill)
+#np.save('./results/error_counts_student_distill__0.25_224_t=4.npy', error_counts_student)
 
 # # Load from file
 error_counts_teacher = np.load('./results/final_error_counts_teacher_normal.npy')
@@ -85,39 +81,24 @@ error_counts_student_3 = np.load('./results/error_counts_student_0.25_224.npy')
 error_counts_student_distill_0_24_224_t1 = np.load('./results/error_counts_student_distill__0.25_224_t=1.npy')
 error_counts_student_distill_0_24_224_t2 = np.load('./results/error_counts_student_distill__0.25_224_t=2.npy')
 error_counts_student_distill_0_24_224_t3 = np.load('./results/error_counts_student_distill__0.25_224_t=3.npy')
+error_counts_student_distill_0_24_224_t4 = np.load('./results/error_counts_student_distill__0.25_224_t=4.npy')
 error_counts_student_distill_0_24_224_t5 = np.load('./results/error_counts_student_distill__0.25_224_t=5.npy')
 error_counts_student_distill_0_24_224_t10 = np.load('./results/error_counts_student_distill__0.25_224_t=10.npy')
 error_counts_student_distill_0_24_224_t15 = np.load('./results/error_counts_student_distill__0.25_224_t=15.npy')
 
-print(error_counts_student_3)
-print(error_counts_student_distill_0_24_224_t3)
-
-#error_counts_teacher_distill = np.load('./results/error_counts_teacher_distill.npy')
-
-print("Minimo errore: ", min(error_counts_student_distill_0_24_224_t3))
-print("Massimo errore: ", max(error_counts_student_distill_0_24_224_t3))
+print("Minimo errore: ", min(error_counts_student_distill_0_24_224_t4))
+print("Massimo errore: ", max(error_counts_student_distill_0_24_224_t4))
 
 # Prepare to plot
 fig, ax = plt.subplots(1,1,figsize=(16,7))
 
-# Plot error
-#ax.plot(range(0, 3001, 100), error_counts_teacher, label='teacher')
-#0,1000,99
-#print(len(error_counts_teacher))
-
-
-# lst_idx = [0]
-# lst_idx.append(x+99 for x in range(100, 1001, 200))
-
 step = 250
-
-lst_x = [x for x in range(0,1001, step)]
-print(len(lst_x))
-
+lst_x=[1]
 lst_idx = [0]
 for x in range(0, 1001, step):
     if x!=0:
         lst_idx.append(x-1)
+        lst_x.append(x)
 
 lst_y_teach = [error_counts_teacher[x] for x in lst_idx]
 print(len(lst_y_teach))
@@ -133,10 +114,9 @@ lst_y_stud_7 = [error_counts_student_distill_0_24_224_t10[x] for x in lst_idx]
 lst_y_stud_8 = [error_counts_student_distill_0_24_224_t15[x] for x in lst_idx]
 lst_y_stud_9 = [error_counts_student_distill_0_24_224_t2[x] for x in lst_idx]
 lst_y_stud_10 = [error_counts_student_distill_0_24_224_t3[x] for x in lst_idx]
+lst_y_stud_11 = [error_counts_student_distill_0_24_224_t4[x] for x in lst_idx]
+
 print(len(lst_y_stud_10))
-
-
-name_img = 'student_distill_0.25_224_T3'
 
 ax.plot(lst_x, lst_y_teach, label='Teacher', linewidth=5)
 #ax.plot(lst_x, lst_y_stud, label='std_C2DH_loss')
@@ -146,6 +126,7 @@ ax.plot(lst_x, lst_y_stud_3, label='Student_0.25_224', linewidth=5)
 ax.plot(lst_x, lst_y_stud_5, label='Student_0.25_224_T=1', alpha=0.5)
 ax.plot(lst_x, lst_y_stud_9, label='Student_0.25_224_T=2',alpha=0.5)
 ax.plot(lst_x, lst_y_stud_10, label='Student_0.25_224_T=3', linewidth=5)
+ax.plot(lst_x, lst_y_stud_11, label='Student_0.25_224_T=4', alpha=0.5)
 ax.plot(lst_x, lst_y_stud_6, label='Student_0.25_224_T=5', alpha=0.5)
 ax.plot(lst_x, lst_y_stud_7, label='Student_0.25_224_T=10', alpha=0.5)
 ax.plot(lst_x, lst_y_stud_8, label='Student_0.25_224_T=15',alpha=0.5)
@@ -166,5 +147,5 @@ line = leg.get_lines()
 line[4].set_linewidth(4.0)
 plt.show()
 
-
-plt.savefig(name_img+'.png')
+name_img = 'student_distill_0.25_224_T4'
+plt.savefig('./images/'+name_img+'.png')

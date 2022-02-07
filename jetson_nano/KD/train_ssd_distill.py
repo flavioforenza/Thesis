@@ -50,7 +50,7 @@ parser.add_argument('--mb2-width-mult', default=1.0, type=float,
 # Params for loading pretrained basenet or checkpoints.
 parser.add_argument('--base-net', default='./model/student_distill-1000.pth', help='Pretrained base model')
 parser.add_argument('--pretrained-ssd', default='', type=str, help='Pre-trained base model')
-parser.add_argument('--resume', default=None, type=str,
+parser.add_argument('--resume', default='./checkpoints_ssd_distill/mb1-ssd-Epoch-0-Loss-6.00645084337357.pth', type=str,
                     help='Checkpoint state_dict file to resume training from')
 
 # Params for SGD
@@ -82,7 +82,7 @@ parser.add_argument('--t-max', default=100, type=float,
 # Train params
 parser.add_argument('--batch-size', default=4, type=int,
                     help='Batch size for training')
-parser.add_argument('--num-epochs', '--epochs', default=30, type=int,
+parser.add_argument('--num-epochs', '--epochs', default=1000, type=int,
                     help='the number epochs')
 parser.add_argument('--num-workers', '--workers', default=2, type=int,
                     help='Number of workers used in dataloading')
@@ -298,6 +298,7 @@ if __name__ == '__main__':
     if args.resume:
         logging.info(f"Resume from the model {args.resume}")
         net.load(args.resume)
+        last_epoch = 30
     elif args.base_net:
         logging.info(f"Init from base net {args.base_net}")
         base_net_pretr = torch.load(args.base_net)
@@ -315,6 +316,11 @@ if __name__ == '__main__':
                              center_variance=0.1, size_variance=0.2, device=DEVICE)
     optimizer = torch.optim.SGD(params, lr=args.lr, momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+
+    if args.resume:
+        for group in optimizer.param_groups:
+            group.setdefault('initial_lr', group['lr'])
+    
     logging.info(f"Learning rate: {args.lr}, Base net learning rate: {base_net_lr}, "
                  + f"Extra Layers learning rate: {extra_layers_lr}.")
 
