@@ -59,7 +59,7 @@ def get_fps(input_list, single_output, operation):
     parser.add_argument("output_URI", type=str, default='/home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/results/%i.jpg', nargs='?', help="URI of the output stream")
     parser.add_argument("--network", type=str, default="", help="pre-trained model to load (see below for options)")
     parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
-    parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
+    parser.add_argument("--threshold", type=float, default=0.3, help="minimum detection threshold to use") 
     parser.add_argument("--input-codec", type=str, default="h264", help="type of output-codec")
 
     is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
@@ -74,7 +74,7 @@ def get_fps(input_list, single_output, operation):
     #dataframe = pd.DataFrame(columns=["Input", "Output", "Video"], index=input_list)
 
     # load the object detection network
-    net = jetson.inference.detectNet(argv=['--model=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/student_ssd_distill.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes'])
+    net = jetson.inference.detectNet(argv=['--model=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/student-ssd-distill-100.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.4'])
     # create video output object 
     output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
     # create video sources
@@ -84,7 +84,7 @@ def get_fps(input_list, single_output, operation):
     lst_frames_output = []
     lst_frames_network = []
     #set a timeout usefull to skip before networks
-    while time.time()<=timeuout:
+    while True:
         # capture the next image
         img = input.Capture()
 
