@@ -19,13 +19,13 @@ from mobilenet_ssd import create_mobilenetv1_ssd
 # parse command line
 parser = argparse.ArgumentParser()
 parser.add_argument('--net', default="ssd-mobilenet", help="The network architecture, it can be mb1-ssd (aka ssd-mobilenet), mb1-lite-ssd, mb2-ssd-lite or vgg16-ssd.")
-parser.add_argument('--input', type=str, default='student_D_ssd_mb1-ssd-Epoch-0-Loss-6.39.pth', help="path to input PyTorch model (.pth checkpoint)")
-parser.add_argument('--output', type=str, default='student-ssd-distill.onnx', help="desired path of converted ONNX model (default: <NET>.onnx)")
+parser.add_argument('--input', type=str, default='teacher-ssd-1000.pth', help="path to input PyTorch model (.pth checkpoint)")
+parser.add_argument('--output', type=str, default='/home/flavio/thesis/jetson_nano/KD/model/teacher-ssd-1000.onnx', help="desired path of converted ONNX model (default: <NET>.onnx)")
 parser.add_argument('--labels', type=str, default='labels.txt', help="name of the class labels file")
 parser.add_argument('--width', type=int, default=300, help="input width of the model to be exported (in pixels)")
 parser.add_argument('--height', type=int, default=300, help="input height of the model to be exported (in pixels)")
 parser.add_argument('--batch-size', type=int, default=1, help="batch size of the model to be exported (default=1)")
-parser.add_argument('--model-dir', type=str, default='/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/', help="directory to look for the input PyTorch model in, and export the converted ONNX model to (if --output doesn't specify a directory)")
+parser.add_argument('--model-dir', type=str, default='/home/flavio/thesis/jetson_nano/KD/model/', help="directory to look for the input PyTorch model in, and export the converted ONNX model to (if --output doesn't specify a directory)")
 parser.add_argument('--alpha', type=float, default=0.25, help="width mutiplier")
 
 

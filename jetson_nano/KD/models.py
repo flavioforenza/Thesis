@@ -66,7 +66,7 @@ alpha=1
 class MobileNetV1_Stud(nn.Module):
     def __init__(self, num_classes=512, wm=1):
         alpha = wm
-        print("Alpha: ", alpha)
+        #print("Alpha: ", alpha)
 
         super(MobileNetV1_Stud, self).__init__()
 

@@ -15,6 +15,7 @@ from training import adjust_learning_rate, validate
 from training import AverageMeter, ProgressMeter, accuracy, save_checkpoint
 from models import MobileNetV1_Stud, MobileNetV1_Teach
 
+
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 
 parser.add_argument('--data', metavar='DIR', default='./data/',
@@ -47,8 +48,10 @@ parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use.')
-parser.add_argument('--resume', default='./model/student_distill_554.pth', type=str, metavar='PATH',
-                    help='path to latest checkpoint (default: none)')                    
+parser.add_argument('--resume', default='./students_distilled/student-1000.pth', type=str, metavar='PATH',
+                    help='path to latest checkpoint (default: none)')                   
+parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_false',
+                    help='evaluate model on validation set') 
                     
 best_acc1 = 0
 
@@ -117,7 +120,9 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
     
     print("Epoch: [{:d}] completed, elapsed time {:6.3f} seconds".format(epoch, time.time() - epoch_start))
 
-    
+
+best_acc1 = 0
+
 args = parser.parse_args()
 
 #DATASET_DIR = '../mnist/'
@@ -153,7 +158,7 @@ if args.resume:
     student_model = MobileNetV1_Stud(num_classes, 0.25)
     checkpoint = torch.load(args.resume)
     print("=> loading checkpoint '{}'".format(args.resume))
-    args.start_epoch = 554
+    args.start_epoch = 0
     student_model.load_state_dict(checkpoint.state_dict())
     print("=> loaded checkpoint '{}' (epoch {})".format(args.resume, args.start_epoch))
 else:
@@ -192,12 +197,13 @@ if args.gpu is not None:
     teacher_model = student_model.cuda(args.gpu)
 
 for epoch in range(args.start_epoch, args.epochs):
-    adjust_learning_rate(optimizer, epoch, args)
-    train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model, args)
+    #adjust_learning_rate(optimizer, epoch, args)
+    #train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model, args)
 
     # evaluate on validation set
-    acc1 = validate(val_loader, student_model, criterion, num_classes, args)
+    acc1, _ = validate(val_loader, student_model, criterion, num_classes, args)
 
+    is_best = acc1 > best_acc1
     # remember best acc@1 and save checkpoint
     best_acc1 = max(acc1, best_acc1)
 
@@ -210,4 +216,5 @@ for epoch in range(args.start_epoch, args.epochs):
     # remember best acc@1 and save checkpoint
     #is_best = acc1 > best_acc1
     #best_acc1 = max(acc1, best_acc1)
+
 

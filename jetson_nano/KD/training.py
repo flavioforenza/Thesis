@@ -22,6 +22,7 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+import time
 
 from train_sd.vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
 
@@ -92,11 +93,8 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
-parser.add_argument('--resume', default='', type=str, metavar='PATH',
+parser.add_argument('--resume', default='./students_distilled/student-1000.pth', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
-
-
-best_acc1 = 0
 
 
 #
@@ -301,7 +299,7 @@ def main_worker(gpu, ngpus_per_node, args):
         train(train_loader, model, criterion, optimizer, epoch, num_classes, args)
 
         # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, num_classes, args)
+        acc1, _ = validate(val_loader, model, criterion, num_classes, args)
 
         # remember best acc@1 and save checkpoint
         best_acc1 = max(acc1, best_acc1)
@@ -426,7 +424,7 @@ def validate(val_loader, model, criterion, num_classes, args):
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
 
-    return top1.avg
+    return top1.avg, top5.avg
 
 
 #

@@ -198,10 +198,6 @@ if __name__ == '__main__':
 
     test_transform = TestTransform(config.image_size, config.image_mean, config.image_std)
 
-    ###OK
-
-    #path_dataset = './train_sd/data/'
-
     # load datasets (could be multiple)
     logging.info("Prepare training datasets.")
     datasets = []
