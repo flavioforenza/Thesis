@@ -55,8 +55,8 @@ def get_fps(input_list, single_output, operation):
                                     formatter_class=argparse.RawTextHelpFormatter, epilog=jetson.inference.detectNet.Usage() +
                                     jetson.utils.videoSource.Usage() + jetson.utils.videoOutput.Usage() + jetson.utils.logUsage())
 
-    parser.add_argument("input_URI", type=str, default='/home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/test/*.jpg', nargs='?', help="URI of the input stream")
-    parser.add_argument("output_URI", type=str, default='/home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/results/%i.jpg', nargs='?', help="URI of the output stream")
+    parser.add_argument("input_URI", type=str, default='/home/flavio/thesis/jetson_nano/KD/cityscapes/*.jpeg', nargs='?', help="URI of the input stream")
+    parser.add_argument("output_URI", type=str, default='/home/flavio/thesis/jetson_nano/KD/detection/%i.jpeg', nargs='?', help="URI of the output stream")
     parser.add_argument("--network", type=str, default="", help="pre-trained model to load (see below for options)")
     parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
     parser.add_argument("--threshold", type=float, default=0.3, help="minimum detection threshold to use") 
@@ -74,7 +74,7 @@ def get_fps(input_list, single_output, operation):
     #dataframe = pd.DataFrame(columns=["Input", "Output", "Video"], index=input_list)
 
     # load the object detection network
-    net = jetson.inference.detectNet(argv=['--model=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/student-ssd-distill-100.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.4'])
+    net = jetson.inference.detectNet(argv=['--model=/home/flavio/thesis/jetson_nano/KD/model/teacher-ssd-1000.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.5'])
     # create video output object 
     output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
     # create video sources
