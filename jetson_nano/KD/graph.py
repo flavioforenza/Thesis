@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import pickle
 import numpy as np
 
+def difference(start, end):
+    return ((end-start)/start)*100
+
+
 def plot_accuracy():
     file = open("./results/all_accuracy_temps.pkl", "rb")
     acc_temps = pickle.load(file)
@@ -41,8 +45,10 @@ def plot_diff_SSD_size():
     size_ssd = 30.7
     size_teacher_SSD = 13
 
-    size_ssd_dist = 2.6
+    size_ssd_dist = 3.5
     size_student_ssd_dist = 0.9
+
+    diff = difference(size_ssd, size_ssd_dist)
 
     plt.rcParams["figure.figsize"] = [5.50, 2.5]
     plt.rcParams["figure.autolayout"] = True
@@ -54,7 +60,7 @@ def plot_diff_SSD_size():
     b5 = ax.barh('Distilled', [size_student_ssd_dist], height=.5, color="green", align='center')
     b2 = ax.barh('Original', [size_ssd], height=.5, color="red", align='center')
     b3 = ax.barh('Original', [size_teacher_SSD], height=.5, color="blue", align='center')
-    ax.text(3, -0.1, '-88,60%', color='black', fontweight='bold', fontsize = 14)
+    ax.text(size_ssd_dist, -0.1, str(format(diff, '.2f'))+'%', color='black', fontweight='bold', fontsize = 14)
 
     plt.legend([b2, b3, b5], ["SSD", "Teacher", "Student"], title="Models", loc="lower right")
     plt.title("Difference size before Original SSD and Distilled SSD")
@@ -66,7 +72,9 @@ def plot_diff_SSD_size():
 
 def plot_diff_teacher_stud():
     size_teach = 13
-    size_stud = 0.9
+    size_stud = 0.948
+
+    diff = difference(size_teach, size_stud)
 
     plt.rcParams["figure.figsize"] = [5.50, 2.5]
     plt.rcParams["figure.autolayout"] = True
@@ -77,7 +85,7 @@ def plot_diff_teacher_stud():
     b1 = ax.barh('Distilled', [size_stud], height=.5, color="green", align='center')
     b2 = ax.barh('Original', [size_teach], height=.5, color="red", align='center')
 
-    ax.text(1, -0.1, '-92.71%', color='black', fontweight='bold', fontsize=14)
+    ax.text(size_stud, -0.1, str(format(diff, '.2f'))+'%', color='black', fontweight='bold', fontsize=14)
 
     plt.title("Difference size before teacher and student")
 
@@ -86,7 +94,7 @@ def plot_diff_teacher_stud():
     #plt.show()
     plt.savefig('./images/Different size base_net' + '.png')
 
-#plot_diff_teacher_stud()
+plot_diff_teacher_stud()
 
 def plot_diff_params(n1, n2,percentage, title, is_legend=True):
 
@@ -101,7 +109,7 @@ def plot_diff_params(n1, n2,percentage, title, is_legend=True):
     b1=ax.barh('Distilled', [n2], height=.5, color="green", align='center')
     b2=ax.barh('Original', [n1], height=.5, color="red", align='center')
 
-    ax.text(n2, -0.1, "-"+str(percentage)+"%", color='black', fontweight='bold', fontsize=14)
+    ax.text(n2, -0.1, str(format(percentage, '.2f'))+"%", color='black', fontweight='bold', fontsize=14)
     if is_legend:
         plt.legend([b2, b1], ["Teacher", "Student", ], title="Models", loc="lower right")
 
@@ -113,9 +121,9 @@ def plot_diff_params(n1, n2,percentage, title, is_legend=True):
 par_base_net_orig = 3215176
 par_base_net_dist = 215128
 title = "Difference base_nets parameters"
-plot_diff_params(par_base_net_orig, par_base_net_dist, 93.3, title)
+plot_diff_params(par_base_net_orig, par_base_net_dist, difference(par_base_net_orig,par_base_net_dist), title)
 
 par_ssd_orig = 7643796
 par_ssd_dist = 861828
 title = "Difference SSD parameters"
-plot_diff_params(par_ssd_orig, par_ssd_dist, 88.73, title, False)
+plot_diff_params(par_ssd_orig, par_ssd_dist, difference(par_ssd_orig, par_ssd_dist), title, False)
