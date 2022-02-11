@@ -25,7 +25,6 @@ import torchvision.models as models
 import time
 
 from train_sd.vision.ssd.mobilenetv1_ssd import create_mobilenetv1_ssd
-
 from models import MobileNetV1_Stud, MobileNetV1_Teach
 
 #from reshape import reshape_model

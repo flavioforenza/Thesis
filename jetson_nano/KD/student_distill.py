@@ -56,7 +56,7 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_false',
 best_acc1 = 0
 
 class CrossEntropyLossForSoftTarget(nn.Module):
-    def __init__(self, T=20):
+    def __init__(self, T=2):
         super(CrossEntropyLossForSoftTarget, self).__init__()
         self.T = T
         self.softmax = nn.Softmax(dim=-1)
@@ -98,7 +98,8 @@ def train(train_loader, student_model, criterion, optimizer, epoch, num_classes,
         output_teacher = teacher_model(images)
         
         loss_teacher = criterion_soft(output_student, output_teacher)
-        loss = criterion(output_student, target) + loss_teacher 
+        loss_student = criterion(output_student, target)
+        loss = loss_student + loss_teacher 
 
         # measure accuracy and record loss
         acc1, acc5 = accuracy(output_student, target, topk=(1, min(5, num_classes)))
@@ -197,8 +198,8 @@ if args.gpu is not None:
     teacher_model = student_model.cuda(args.gpu)
 
 for epoch in range(args.start_epoch, args.epochs):
-    #adjust_learning_rate(optimizer, epoch, args)
-    #train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model, args)
+    adjust_learning_rate(optimizer, epoch, args)
+    train(train_loader, student_model, criterion, optimizer, epoch, num_classes, teacher_model, args)
 
     # evaluate on validation set
     acc1, _ = validate(val_loader, student_model, criterion, num_classes, args)
