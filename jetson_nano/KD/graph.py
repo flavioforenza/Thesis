@@ -1,9 +1,21 @@
 import matplotlib.pyplot as plt
 import pickle
 import numpy as np
+import pandas as pd
 
 def difference(start, end):
     return ((end-start)/start)*100
+
+input_list = [
+	"video/240p_60fps.mp4",
+	"video/360p_30fps.mp4",
+	"video/480p_30fps.mp4",
+	"video/720p_30fps.mp4",
+	"video/1080p_30fps.mp4",
+	"video/1080p_60fps.mp4",
+	"csi://0", 
+	"/dev/video1"
+			]
 
 
 def plot_accuracy():
@@ -94,7 +106,7 @@ def plot_diff_teacher_stud():
     #plt.show()
     plt.savefig('./images/Different size base_net' + '.png')
 
-plot_diff_teacher_stud()
+#plot_diff_teacher_stud()
 
 def plot_diff_params(n1, n2,percentage, title, is_legend=True):
 
@@ -117,13 +129,73 @@ def plot_diff_params(n1, n2,percentage, title, is_legend=True):
     plt.savefig('./images/'+title + '.png')
 
 
-#Diff param base_net
-par_base_net_orig = 3215176
-par_base_net_dist = 215128
-title = "Difference base_nets parameters"
-plot_diff_params(par_base_net_orig, par_base_net_dist, difference(par_base_net_orig,par_base_net_dist), title)
+# #Diff param base_net
+# par_base_net_orig = 3215176
+# par_base_net_dist = 215128
+# title = "Difference base_nets parameters"
+# plot_diff_params(par_base_net_orig, par_base_net_dist, difference(par_base_net_orig,par_base_net_dist), title)
 
-par_ssd_orig = 7643796
-par_ssd_dist = 861828
-title = "Difference SSD parameters"
-plot_diff_params(par_ssd_orig, par_ssd_dist, difference(par_ssd_orig, par_ssd_dist), title, False)
+# par_ssd_orig = 7643796
+# par_ssd_dist = 861828
+# title = "Difference SSD parameters"
+# plot_diff_params(par_ssd_orig, par_ssd_dist, difference(par_ssd_orig, par_ssd_dist), title, False)   
+
+def diff_FPS():
+    path_distill = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/obj_detection_ssd_distill/ssd_std_dst_obj_detection_Freeze_max.csv'
+    path_original = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/obj_detection_ssd_distill/ssd_teacher_object_detection_max.csv.csv'
+    dataframe_distill = pd.read_csv(path_distill, index_col=[0])
+    dataframe_original = pd.read_csv(path_original, index_col=[0])
+    width = 0.45
+    plt.rcParams["figure.figsize"] = [8, 4]
+    plt.rcParams["figure.autolayout"] = True
+
+    fig, ax = plt.subplots()
+
+    dict_out = {
+        'Dist': [],
+        'Original': [],
+        'Percentage': []
+    }
+    dict_net = {
+        'Dist': [],
+        'Original': [],
+        'Percentage': []
+    }
+
+    lst_source = ['W1', 'W2', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6']
+    for col in dataframe_distill.columns:
+        if col != 'Input':
+            value_end = dataframe_distill[col].values
+            value_start = dataframe_original[col].values
+            percentage = [difference(value_start[x], value_end[x]) for x in range(0,len(lst_source))]
+            if col == "Output":
+                dict_out['Dist'] = value_end
+                dict_out['Original'] = value_start
+                dict_out['Percentage'] = percentage
+            elif col == 'Video':
+                dict_net['Dist'] = value_end
+                dict_net['Original'] = value_start
+                dict_net['Percentage'] = percentage
+
+    ind = np.arange(len(lst_source))
+    ax.bar(ind, dict_net['Dist'], width, color="green", align='center')
+    ax.bar(ind, dict_net['Original'], width, color="red", align='center')
+    rects = ax.patches
+
+    idx = 0
+    for rect, label in zip(rects, dict_net['Dist']):
+        height = rect.get_height()
+        ax.text(rect.get_x() + rect.get_width() / 2, height + 5, '+'+str(int(dict_net['Percentage'][idx])) + "%", ha="center", va="bottom", color='green', fontweight='bold', fontsize=12)
+        ax.text(rect.get_x() + rect.get_width() / 2, height - 7, str(int(label)), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
+        ax.text(rect.get_x() + rect.get_width() / 2, int(dict_net['Original'][idx]) - 7, str(int(dict_net['Original'][idx])), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
+        idx += 1
+
+    plt.ylabel('FPS')
+    plt.title('Max FPS difference between Original SSD and Distilled SSD')
+    plt.xticks(ind, ('V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'W1', 'W2'))
+    plt.yticks(np.arange(0, max(dict_net['Dist'])+20, 10))
+    #plt.show()
+
+    plt.savefig('./images/Difference FPS.png')
+
+diff_FPS()
