@@ -119,7 +119,7 @@ def get_fps(input_list, output_list, networks, operation):
 			input_name = save_Dataframe(single_input)
 			output_name = save_Dataframe(single_output)
 			filename = "benchmarks jetson input: " + input_name + " output: " + output_name +  ".csv"
-			dataframe.to_csv(operation+'/'+filename)
+			#dataframe.to_csv(operation+'/'+filename)
 
 networks_detectNet = [
 	"ssd-mobilenet-v1",
