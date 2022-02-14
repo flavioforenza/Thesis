@@ -18,7 +18,7 @@ import torch.onnx
 import subprocess as sp
 
 sys.path.append('../jetson_benchmarks/benchmarks_pt2/')
-from obj_detection_ssd_custom_utils import get_fps
+#from obj_detection_ssd_custom_utils import get_fps
 
 sys.path.append('/home/flavio/thesis/jetson_nano/jetson-inference/build/aarch64/bin/')
 #import detectnet
@@ -204,7 +204,7 @@ def get_loss():
 #create dict_loss
 #get_loss()
 
-def get_plot(method, index):
+def get_plot(method, index, t_loss):
     file = open("dict_loss.pkl", "rb")
     dict_loss = pickle.load(file)
     plt.style.use('seaborn-white')
@@ -218,23 +218,24 @@ def get_plot(method, index):
 
     pd.DataFrame.assign
 
-    (pd.DataFrame(losses, columns=['sparsity', 'loss'])
-    .pipe(lambda df: df.assign(perf=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
-    .plot.line(x='sparsity', y='perf', figsize=(12, 8), title="L1 " + method +  " Pruned Mean Batch Loss"))
+    (pd.DataFrame(losses, columns=['Sparsity', 'loss'])
+    .pipe(lambda df: df.assign(Performance=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
+    .plot.line(x='Sparsity', y='Performance', figsize=(9, 6),linewidth=2.5, title="L1 " + method +  " " + t_loss))
+    plt.legend(loc='upper left')
     sns.despine()
 
     if index==0:
-        plt.savefig('images/'+method+"_Loss_"+"_.png")
+        plt.savefig('images/'+method+"_Loss.png")
     elif index==1:
-        plt.savefig('images/'+method+"_ClassLoss_"+"_.png")
+        plt.savefig('images/'+method+"_ClassLoss.png")
     elif index==2:
-        plt.savefig('images/'+method+"_RegrLoss_"+"_.png")
+        plt.savefig('images/'+method+"_RegrLoss.png")
 
 #generating loss plot: Global loss, Regression loss and classification loss.
-# for i in range(0,3):
-#     get_plot(methods[i], 0)
-#     get_plot(methods[i], 1)
-#     get_plot(methods[i], 2)
+for i in range(0,3):
+    get_plot(methods[i], 0, 'Loss')
+    get_plot(methods[i], 1, 'Regression loss')
+    get_plot(methods[i], 2, 'Classification loss')
 
 #Converting pruned model in onnx format
 
@@ -269,51 +270,6 @@ def convert_models():
 
 #convert_models()
 
-#test performance
 
-def get_models(method, dir):
-    files = []
-    dir_input = './models/pruned/'+method+'/'+dir
-    for i in range(0, 105, 5):
-        model_path_pth = dir_input+"/"+str(i)+'%_'+method+'_pruned_model.'+dir
-        files.append(model_path_pth)
-    return files
-    
-for i in range(2,3):
-    input_list = [
-        #"video/240p_60fps.mp4",
-        #"video/360p_30fps.mp4"
-        #"video/480p_30fps.mp4",
-        #"video/720p_30fps.mp4",
-        # "video/1080p_30fps.mp4",
-        # "video/1080p_60fps.mp4",
-        "csi://0"
-        #"/dev/video1"
-    ]
-    output = "display://0"
-    networks_list = get_models(methods[i], 'onnx')
-    #half_list_net = [networks_list[i] for i in range(0, int(len(networks_list)/2))]
-    operation = './benchmarks/'+methods[i]
-    labels = './models/pruned/labels.txt'
-    print("Get FPS for " + methods[i] + " method...")
-
-    #cmd = 'cd /home/flavio/thesis/jetson_nano/jetson-inference/build/aarch64/bin/;'
-    #cmd2 = 'python3 detectnet.py --model=/home/flavio/thesis/jetson_nano/Pruning/models/pruned/unstructured/onnx/50%_unstructured_pruned_model.onnx --labels=/home/flavio/thesis/jetson_nano/Pruning/models/pruned/labels.txt --input-blob=input_0 --output-cvg=scores --output-bbox=boxes /home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/test /home/flavio/thesis/jetson_nano/Pruning/data/OpenImages/result'
-    
-    #sts = os.system(cmd+cmd2)
-    # sts2 = sp.Popen(cmd+cmd2, shell=True, stdout=subprocess.PIPE).stdout
-    # info = sts2.read()
-    # print(type(info))
-    # print(type(info.decode()))
-    # print(info.decode())
-    dataframe, filename = get_fps(input_list, output, networks_list, labels)
-    path_dataset = operation+'/'+filename
-    dataframe.to_csv(operation+'/'+filename)
-    # if not os.path.exists(path_dataset):
-    #         with open(path_dataset, "rb") as f:
-    #             dataframe_old = pickle.load(f)
-
-    # else:
-    #     dataframe.to_csv(operation+'/'+filename)
 
     
