@@ -140,9 +140,9 @@ def plot_diff_params(n1, n2,percentage, title, is_legend=True):
 # title = "Difference SSD parameters"
 # plot_diff_params(par_ssd_orig, par_ssd_dist, difference(par_ssd_orig, par_ssd_dist), title, False)   
 
-def diff_FPS():
-    path_distill = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/obj_detection_ssd_distill/ssd_std_dst_obj_detection_Freeze_max.csv'
-    path_original = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/obj_detection_ssd_distill/ssd_teacher_object_detection_max.csv.csv'
+def diff_FPS(path_distill, path_original, name):
+    #path_distill = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/obj_detection_ssd_distill/ssd_std_dst_obj_detection_Freeze_mean.csv'
+    #path_original = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/obj_detection_ssd_distill/ssd_teacher_object_detection_mean.csv.csv'
     dataframe_distill = pd.read_csv(path_distill, index_col=[0])
     dataframe_original = pd.read_csv(path_original, index_col=[0])
     width = 0.45
@@ -162,7 +162,7 @@ def diff_FPS():
         'Percentage': []
     }
 
-    lst_source = ['W1', 'W2', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6']
+    lst_source = ['V1', 'V2', 'V3', 'V4', 'V5', 'V6']
     for col in dataframe_distill.columns:
         if col != 'Input':
             value_end = dataframe_distill[col].values
@@ -186,16 +186,18 @@ def diff_FPS():
     for rect, label in zip(rects, dict_net['Dist']):
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width() / 2, height + 5, '+'+str(int(dict_net['Percentage'][idx])) + "%", ha="center", va="bottom", color='green', fontweight='bold', fontsize=12)
-        ax.text(rect.get_x() + rect.get_width() / 2, height - 7, str(int(label)), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
-        ax.text(rect.get_x() + rect.get_width() / 2, int(dict_net['Original'][idx]) - 7, str(int(dict_net['Original'][idx])), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
+        ax.text(rect.get_x() + rect.get_width() / 2, height - 30, str(int(label)), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
+        ax.text(rect.get_x() + rect.get_width() / 2, int(dict_net['Original'][idx]) - 30, str(int(dict_net['Original'][idx])), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
         idx += 1
 
     plt.ylabel('FPS')
-    plt.title('Max FPS difference between Original SSD and Distilled SSD')
-    plt.xticks(ind, ('V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'W1', 'W2'))
-    plt.yticks(np.arange(0, max(dict_net['Dist'])+20, 10))
+    plt.title('Colab: Mean FPS difference between Original SSD and Distilled SSD (cv2 - GPU)')
+    plt.xticks(ind, ('V1', 'V2', 'V3', 'V4', 'V5', 'V6'))
+    plt.yticks(np.arange(0, 551, 50))
     #plt.show()
 
-    plt.savefig('./images/Difference FPS.png')
+    plt.savefig(name+'.png')
 
-diff_FPS()
+path_distill = '/home/flavio/thesis/colab/Knowledge distillation benchmarks/bench_distill_cuda.csv'
+path_original = '/home/flavio/thesis/colab/Knowledge distillation benchmarks/bench_original_cuda.csv'
+diff_FPS(path_distill, path_original, './images/Mean Difference FPS Colab only GPU')
