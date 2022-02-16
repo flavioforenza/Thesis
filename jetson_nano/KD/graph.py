@@ -162,7 +162,7 @@ def diff_FPS(path_distill, path_original, name):
         'Percentage': []
     }
 
-    lst_source = ['V1', 'V2', 'V3', 'V4', 'V5', 'V6']
+    lst_source = ['W1', 'W2', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6']
     for col in dataframe_distill.columns:
         if col != 'Input':
             value_end = dataframe_distill[col].values
@@ -186,18 +186,18 @@ def diff_FPS(path_distill, path_original, name):
     for rect, label in zip(rects, dict_net['Dist']):
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width() / 2, height + 5, '+'+str(int(dict_net['Percentage'][idx])) + "%", ha="center", va="bottom", color='green', fontweight='bold', fontsize=12)
-        ax.text(rect.get_x() + rect.get_width() / 2, height - 30, str(int(label)), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
-        ax.text(rect.get_x() + rect.get_width() / 2, int(dict_net['Original'][idx]) - 30, str(int(dict_net['Original'][idx])), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
+        ax.text(rect.get_x() + rect.get_width() / 2, height - 9, str(int(label)), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
+        ax.text(rect.get_x() + rect.get_width() / 2, int(dict_net['Original'][idx]) - 9, str(int(dict_net['Original'][idx])), ha="center", va="bottom", color='white', fontweight='bold', fontsize=10)
         idx += 1
 
     plt.ylabel('FPS')
-    plt.title('Colab: Mean FPS difference between Original SSD and Distilled SSD (cv2 - GPU)')
-    plt.xticks(ind, ('V1', 'V2', 'V3', 'V4', 'V5', 'V6'))
-    plt.yticks(np.arange(0, 551, 50))
+    plt.title('Jetson: Mean FPS difference between Original SSD and Distilled SSD (TensorRT)')
+    plt.xticks(ind, ('V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'W1', 'W2'))
+    plt.yticks(np.arange(0, max(dict_net['Dist'])+20, 10))
     #plt.show()
 
     plt.savefig(name+'.png')
 
-path_distill = '/home/flavio/thesis/colab/Knowledge distillation benchmarks/bench_distill_cuda.csv'
-path_original = '/home/flavio/thesis/colab/Knowledge distillation benchmarks/bench_original_cuda.csv'
-diff_FPS(path_distill, path_original, './images/Mean Difference FPS Colab only GPU')
+path_distill = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/SSD_Distill_obj_detection/MAXP_ssd_studet_Distilled_object_detection_mean.csv'
+path_original = '/home/flavio/thesis/jetson_nano/jetson_benchmarks/benchmarks_pt2/SSD_Distill_obj_detection/MAXP_ssd_teacher_object_detection_mean.csv'
+diff_FPS(path_distill, path_original, './images/Mean Difference FPS Jetson TensorRT')
