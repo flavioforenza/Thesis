@@ -43,7 +43,7 @@ input_list = [
 			]
 
 def get_fps(input_list, single_output, operation):
-    path = 'obj_detection_ssd_distill/'+operation+'.csv'
+    path = 'SSD_Distill_obj_detection/'+operation+'.csv'
     if os.path.isfile(path):
         dataframe = pd.read_csv(path, index_col=[0])
         print(dataframe)
@@ -63,7 +63,7 @@ def get_fps(input_list, single_output, operation):
         parser.add_argument("output_URI", type=str, default=single_output, nargs='?', help="URI of the output stream")
         parser.add_argument("--network", type=str, default="", help="pre-trained model to load (see below for options)")
         parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
-        parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
+        #parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
         parser.add_argument("--input-codec", type=str, default="h264", help="type of output-codec")
 
         is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
@@ -155,6 +155,6 @@ def get_fps(input_list, single_output, operation):
 
 #output_list = ["display://0", "rtp://192.168.1.52:5005"]
 #'--model=/home/flavio/thesis/jetson_nano/KD/model/SSD_distill_Freeze_1000.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.5'
-get_fps(input_list, "display://0", "ssd_student_distill_object_detection_Freeze")
+get_fps(input_list, "display://0", "MAXP_ssd_studet_Distilled_object_detection_mean.csv")
 
 
