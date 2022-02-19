@@ -1,6 +1,7 @@
 from ast import operator
 from asyncio import subprocess
 from copyreg import remove_extension
+from pyexpat import model
 from this import d
 from turtle import update
 import torch
@@ -16,6 +17,8 @@ import pandas as pd
 import numpy as np
 import torch.onnx
 import subprocess as sp
+import glob
+import gzip
 
 sys.path.append('../jetson_benchmarks/benchmarks_pt2/')
 #from obj_detection_ssd_custom_utils import get_fps
@@ -219,8 +222,8 @@ def get_plot(method, index, t_loss):
     pd.DataFrame.assign
 
     (pd.DataFrame(losses, columns=['Sparsity', 'loss'])
-    .pipe(lambda df: df.assign(Performance=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
-    .plot.line(x='Sparsity', y='Performance', figsize=(9, 6),linewidth=2.5, title="L1 " + method +  " " + t_loss))
+    .pipe(lambda df: df.assign(Loss=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
+    .plot.line(x='Sparsity', y='Loss', figsize=(9, 6),linewidth=2.5, title="L1 " + method +  " " + t_loss))
     plt.legend(loc='upper left')
     sns.despine()
 
@@ -232,10 +235,10 @@ def get_plot(method, index, t_loss):
         plt.savefig('images/'+method+"_RegrLoss.png")
 
 #generating loss plot: Global loss, Regression loss and classification loss.
-for i in range(0,3):
-    get_plot(methods[i], 0, 'Loss')
-    get_plot(methods[i], 1, 'Regression loss')
-    get_plot(methods[i], 2, 'Classification loss')
+# for i in range(0,3):
+#     get_plot(methods[i], 0, 'Loss')
+#     get_plot(methods[i], 1, 'Regression loss')
+#     get_plot(methods[i], 2, 'Classification loss')
 
 #Converting pruned model in onnx format
 
@@ -270,6 +273,59 @@ def convert_models():
 
 #convert_models()
 
+def zip_model():
+    path = './models/pruned'
+    dict_size = {k:[] for k in methods}
+    for filename in os.listdir(path):
+        method = os.path.join(path, filename)
+        for i in range(0, 105, 5):
+            model_path_pth = method+"/"+str(i)+'%_'+filename+'_pruned_model.pth'
+            #file_stats = os.path.getsize(model_path_pth)
+            #original_size = float(format(file_stats*10e-7, '.1f'))
+            #print("Original Size: ", original_size)
+            in_data = open(model_path_pth, "rb").read()
+            gzf = gzip.open(model_path_pth+'.gz', "wb")
+            gzf.write(in_data)
+            
+            file_stats_new = os.path.getsize(model_path_pth+'.gz')
+            pruned_size = float(format(file_stats_new*10e-7, '.1f'))
+            dict_size[filename].append(pruned_size)
+            print("Model: ", model_path_pth)
+            print("Pruned Size: ", pruned_size)
 
+            gzf.close()
+    return dict_size
+    
+# dict_size_zip = zip_model()
+# a_file = open("dict_zip.pkl", "wb")
+# pickle.dump(dict_size_zip, a_file)
+# a_file.close()
+
+def get_plot_size(value, x):
+    width = 7
+    plt.rcParams["figure.figsize"] = [8, 4]
+    plt.rcParams["figure.autolayout"] = True
+    fig, ax = plt.subplots()
 
     
+    ax.bar(x, value, width, color="blue", align='center')
+
+    rects = ax.patches
+    
+    idx = 0
+    for rect, label in zip(rects, value):
+       height = rect.get_height()
+       ax.text(rect.get_x() + rect.get_width() / 2, height -1.5, str(label), ha="center", va="bottom", color='white', fontweight='bold', fontsize=9)
+       idx += 1
+
+    plt.xlabel('% Sparsity')
+    plt.ylabel('MByte')
+    plt.title('Compressed pruned model size.')
+    plt.yticks(np.arange(0, max(value)+5, 5))
+    #plt.show()
+    plt.savefig('Unstructured_reduction.png')
+
+file = open("dict_zip.pkl", "rb")
+dict_zip = pickle.load(file)
+#print(len(dict_zip['unstructured']))
+get_plot_size([dict_zip['unstructured'][x] for x in range(0,21, 2)], [x for x in range(0, 101, 10)])
