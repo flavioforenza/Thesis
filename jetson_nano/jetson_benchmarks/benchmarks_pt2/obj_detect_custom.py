@@ -42,8 +42,7 @@ input_list = [
 	"/dev/video1"
 			]
 
-def get_fps(input_list, single_output, operation):
-    path = 'SSD_Distill_obj_detection/'+operation+'.csv'
+def get_fps(single_output, path, model_onnx):
     if os.path.isfile(path):
         dataframe = pd.read_csv(path, index_col=[0])
         print(dataframe)
@@ -76,7 +75,7 @@ def get_fps(input_list, single_output, operation):
             sys.exit(0)
 
         # load the object detection network
-        net = jetson.inference.detectNet(argv=['--model=/home/flavio/thesis/jetson_nano/KD/model/SSD_distill_Freeze_1000.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.5'])
+        net = jetson.inference.detectNet(argv=['--model='+model_onnx, '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.5'])
         # create video output object 
         output = jetson.utils.videoOutput(opt.output_URI, argv=sys.argv+is_headless)
         # create video sources
@@ -153,8 +152,24 @@ def get_fps(input_list, single_output, operation):
         dataframe.to_csv(path)
 
 
+#TEST FPS FOR KNOWLEDGE DISTILLATION
 #output_list = ["display://0", "rtp://192.168.1.52:5005"]
 #'--model=/home/flavio/thesis/jetson_nano/KD/model/SSD_distill_Freeze_1000.onnx', '--labels=/home/flavio/thesis/jetson_nano/KD/checkpoints_ssd_distill/labels.txt', '--input-blob=input_0', '--output-cvg=scores', '--output-bbox=boxes', '--threshold=0.5'
-get_fps(input_list, "display://0", "MAXP_ssd_studet_Distilled_object_detection_mean.csv")
+#name_dataframe = 'MAXP_ssd_studet_Distilled_object_detection_mean'
+#path_distill = 'SSD_Distill_obj_detection/'+name_dataframe+'.csv'
+#model = '/home/flavio/thesis/jetson_nano/KD/model/SSD_distill_Freeze_1000.onnx'
+#get_fps("display://0", path_distill, model)
 
-
+#TEST FPS FOR PRUNING
+name_dataframe = 'MAXP_ssd_studet_Pruned_object_detection_mean'
+path_pruned = 'SSD_Pruned_obj_detection/'+name_dataframe+'.csv'
+path_models_pruned = '/home/flavio/thesis/jetson_nano/Pruning/models/pruned'
+os.system(
+    "sudo nvpmodel -m 0; sudo jetson_clocks"
+)
+for filename in os.listdir(path_models_pruned):
+    method = os.path.join(path_models_pruned, filename)
+    method = method+'/onnx/'
+    for i in range(0, 105, 5):
+        model_path_onnx = method+"/"+str(i)+'%_'+filename+'_pruned_model.onnx'
+        get_fps("display://0", path_pruned, model_path_onnx)
