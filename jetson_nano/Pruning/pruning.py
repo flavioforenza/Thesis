@@ -20,11 +20,15 @@ import subprocess as sp
 import glob
 import gzip
 
-sys.path.append('../jetson_benchmarks/benchmarks_pt2/')
+#sys.path.append('../jetson_benchmarks/benchmarks_pt2/')
 #from obj_detection_ssd_custom_utils import get_fps
 
-sys.path.append('/home/flavio/thesis/jetson_nano/jetson-inference/build/aarch64/bin/')
+#sys.path.append('/home/flavio/thesis/jetson_nano/jetson-inference/build/aarch64/bin/')
 #import detectnet
+
+#sys.path.append('/home/flavio/thesis/jetson_nano/KD/')
+#import statistics as st
+
 
 from prettytable import PrettyTable
 from tqdm import tqdm
@@ -34,18 +38,11 @@ from vision.ssd.config import mobilenetv1_ssd_config
 from vision.nn.multibox_loss import MultiboxLoss
 from train_ssd.train_ssd import test
 from torch import nn
-#from ..jetson_benchmarks.benchmarks_pt2.obj_detection_ssd_custom_utils import get_fps
 
+#from ..jetson_benchmarks.benchmarks_pt2.obj_detection_ssd_custom_utils import get_fps
 #from torch import fx
 #from torch.autograd import Variable
-#from soft import simplify 
-#from soft.simplify.utils import get_bn_folding, get_pinned_out, get_pinned
-#from soft.simplify import remove_zeroed
-#from soft.simplify.remove import remove_zeroed
-#from soft.simplify import simplify as sp
-#from torchsummary import summary
 #from train_ssd.vision.nn.mobilenet import MobileNetV1
-#from soft.simplify import utils as utl
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -301,9 +298,12 @@ def zip_model():
 # pickle.dump(dict_size_zip, a_file)
 # a_file.close()
 
+def difference(start, end):
+    return ((end-start)/start)*100
+
 def get_plot_size(value, x):
     width = 7
-    plt.rcParams["figure.figsize"] = [8, 4]
+    plt.rcParams["figure.figsize"] = [10, 6]
     plt.rcParams["figure.autolayout"] = True
     fig, ax = plt.subplots()
 
@@ -315,17 +315,88 @@ def get_plot_size(value, x):
     idx = 0
     for rect, label in zip(rects, value):
        height = rect.get_height()
-       ax.text(rect.get_x() + rect.get_width() / 2, height -1.5, str(label), ha="center", va="bottom", color='white', fontweight='bold', fontsize=9)
+       ax.text(rect.get_x() + rect.get_width() / 2, height, str(int(difference(30.7, label))) + "%", ha="center", va="bottom", color='green', fontweight='bold', fontsize=14)
+       ax.text(rect.get_x() + rect.get_width() / 2, height -1.5, str(label), ha="center", va="bottom", color='white', fontweight='bold', fontsize=11)
        idx += 1
 
-    plt.xlabel('% Sparsity')
-    plt.ylabel('MByte')
+    plt.xlabel('% Sparsity', fontweight='bold')
+    plt.ylabel('MByte', fontweight='bold')
     plt.title('Compressed pruned model size.')
     plt.yticks(np.arange(0, max(value)+5, 5))
     #plt.show()
-    plt.savefig('Unstructured_reduction.png')
+    plt.savefig('./images/Unstructured_reduction.png')
 
-file = open("dict_zip.pkl", "rb")
-dict_zip = pickle.load(file)
+#file = open("dict_zip.pkl", "rb")
+#dict_zip = pickle.load(file)
 #print(len(dict_zip['unstructured']))
-get_plot_size([dict_zip['unstructured'][x] for x in range(0,21, 2)], [x for x in range(0, 101, 10)])
+#get_plot_size([dict_zip['unstructured'][x] for x in range(0,21, 2)], [x for x in range(0, 101, 10)])
+
+#count parameters !=0
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    zeros = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: 
+            continue
+        if parameter is not None:
+            zeros_layer = torch.sum((parameter == 0).int()).item()
+            zeros += zeros_layer
+        else:
+            print("Is None")
+        param = parameter.numel()
+        table.add_row([name, param - zeros_layer])
+        total_params+=param
+    print(table)
+    print(f"Total Trainable Params: {total_params-zeros}")
+    return total_params-zeros
+
+
+def parameters():
+    dict_params = {k:[] for k in methods}
+    path = './models/pruned'
+    with tqdm(total=(10*3)+3, file=sys.stdout) as pbar:
+        logging.disable(logging.CRITICAL)
+        for filename in os.listdir(path):
+            method = os.path.join(path, filename)
+            for i in range(0, 105, 10):
+                sys.stdout = open(os.devnull, 'w')
+                model_path_pth = method+"/"+str(i)+'%_'+filename+'_pruned_model.pth'
+                print(str(i)+'%_'+filename+'_pruned_model.pth')
+                model = create_model()
+                model.load(model_path_pth)
+                tot_param = count_parameters(model)
+                dict_params[filename].append(tot_param)
+                sys.stdout = sys.__stdout__
+                pbar.update(1)
+    return dict_params
+
+# parameters_dict = parameters()
+# a_file = open("dict_parameters.pkl", "wb")
+# pickle.dump(parameters_dict, a_file)
+# a_file.close()
+
+#calcolo differenze in percentuali parametri
+def get_plot_parameters(value, x):
+    width = 7
+    plt.rcParams["figure.figsize"] = [10, 6]
+    plt.rcParams["figure.autolayout"] = True
+    fig, ax = plt.subplots()
+    ax.bar(x, value, width, color="blue", align='center')
+    rects = ax.patches    
+    for rect, label in zip(rects, value):
+        height = rect.get_height()
+        ax.text(rect.get_x() + rect.get_width() / 2, height, str(format(label*1e-6, '.2f')), ha="center", va="bottom", color='black', fontsize=11)
+            
+
+    plt.xlabel('% Sparsity', fontweight='bold')
+    plt.ylabel('# Parameters', fontweight='bold')
+    plt.title('Trainable parameters pruned models')
+    #plt.yticks(np.arange(0, max(value)+2e6, 1e6))
+    #plt.show()
+    plt.savefig('./images/Pruning_Unstructured_parameters.png')
+
+file = open("dict_parameters.pkl", "rb")
+dict_param = pickle.load(file)
+
+get_plot_parameters(dict_param['unstructured'], [x for x in range(0, 101, 10)])
