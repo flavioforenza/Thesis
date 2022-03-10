@@ -54,6 +54,9 @@ methods = ["unstructured", "structured", 'global']
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+def difference(start, end):
+    return ((end-start)/start)*100
+
 def count_parameters(model):
     table = PrettyTable(["Modules", "Parameters"])
     total_params = 0
@@ -213,29 +216,46 @@ def get_plot(method, index, t_loss):
     for i in range (0, len(dict_loss[method])):
         total_amount = i * 5
         vl = dict_loss[method]
-        loss = vl[i][index] #get the loss of currente percentage
+        loss = vl[i][index] #get the loss of current percentage
         losses.append((total_amount/100,loss))
 
-    pd.DataFrame.assign
+    ref_value = losses[0][1]
+    lst_diff_loss = [(0,0)]
+    for i in range (1, len(losses)):
+        diff = difference(ref_value, losses[i][1])
+        lst_diff_loss.append((losses[i][0]*100, diff))
 
-    (pd.DataFrame(losses, columns=['Sparsity', 'loss'])
-    .pipe(lambda df: df.assign(Loss=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
-    .plot.line(x='Sparsity', y='Loss', figsize=(9, 6),linewidth=2.5, title="L1 " + method +  " " + t_loss))
-    plt.legend(loc='upper left')
-    sns.despine()
+    #disp_list = y_lab[0::2]
 
-    if index==0:
-        plt.savefig('images/'+method+"_Loss.png")
-    elif index==1:
-        plt.savefig('images/'+method+"_ClassLoss.png")
-    elif index==2:
-        plt.savefig('images/'+method+"_RegrLoss.png")
+    plt.plot([fisrt[0] for fisrt in losses], [second[1] for second in lst_diff_loss])
+    plt.xlabel('x - axis')
+    plt.ylabel('y - axis')
+    plt.title('Losses')
+
+    a_file = open("lst_perc_loss_"+method+"_"+t_loss+".pkl", "wb")
+    pickle.dump(lst_diff_loss, a_file)
+    a_file.close()
+    
+    # pd.DataFrame.assign
+
+    # (pd.DataFrame(losses, columns=['Sparsity', 'loss'])
+    # .pipe(lambda df: df.assign(Loss=(df.loss - pd.Series([losses[0][1]] * len(df))) / losses[0][1] + 1))
+    # .plot.line(x='Sparsity', y='Loss', figsize=(9, 6),linewidth=2.5, title="L1 " + method +  " " + t_loss))
+    # plt.legend(loc='upper left')
+    # sns.despine()
+
+    # if index==0:
+    #     plt.savefig('images/'+method+"_Loss.png")
+    # elif index==1:
+    #     plt.savefig('images/'+method+"_RegrLoss.png")
+    # elif index==2:
+    #     plt.savefig('images/'+method+"_ClassLoss.png")
 
 #generating loss plot: Global loss, Regression loss and classification loss.
-# for i in range(0,3):
+# for i in range(1,3):
 #     get_plot(methods[i], 0, 'Loss')
-#     get_plot(methods[i], 1, 'Regression loss')
-#     get_plot(methods[i], 2, 'Classification loss')
+#     get_plot(methods[i], 1, 'Regression')
+#     get_plot(methods[i], 2, 'Classification')
 
 #Converting pruned model in onnx format
 
@@ -298,16 +318,12 @@ def zip_model():
 # pickle.dump(dict_size_zip, a_file)
 # a_file.close()
 
-def difference(start, end):
-    return ((end-start)/start)*100
-
 def get_plot_size(value, x):
     width = 7
     plt.rcParams["figure.figsize"] = [10, 6]
     plt.rcParams["figure.autolayout"] = True
     fig, ax = plt.subplots()
 
-    
     ax.bar(x, value, width, color="blue", align='center')
 
     rects = ax.patches
@@ -396,7 +412,42 @@ def get_plot_parameters(value, x):
     #plt.show()
     plt.savefig('./images/Pruning_Unstructured_parameters.png')
 
-file = open("dict_parameters.pkl", "rb")
-dict_param = pickle.load(file)
+#file = open("dict_parameters.pkl", "rb")
+#dict_param = pickle.load(file)
 
-get_plot_parameters(dict_param['unstructured'], [x for x in range(0, 101, 10)])
+#get_plot_parameters(dict_param['unstructured'], [x for x in range(0, 101, 10)])
+
+def min_max_loss():
+    file = open("dict_loss.pkl", "rb")
+    dict_loss = pickle.load(file)
+    dict_min_max = {k:[] for k in dict_loss.keys()}
+    lst_max_comp = [0,0,0]
+    lst_min_comp = [100,100,100]
+    type_pruning = ''
+    for type, lst_loss in dict_loss.items():
+        if type_pruning == '':
+            type_pruning = type
+        else:
+            if type_pruning!=type:
+                lst_max_comp = [0,0,0]
+                lst_min_comp = [100,100,100]
+                type_pruning = type
+        print()                
+        for i in range(0, len(lst_loss)):
+            for num in range (0,len(lst_loss[i])):
+                if lst_loss[i][num] > lst_max_comp[num]:
+                    lst_max_comp[num] = lst_loss[i][num]
+                if lst_loss[i][num] < lst_min_comp[num]:
+                    lst_min_comp[num] = lst_loss[i][num]
+        dict_min_max[type].append(lst_max_comp)
+        dict_min_max[type].append(lst_min_comp)
+    print(dict_min_max)
+                
+
+#min_max_loss()
+
+file = open("dict_loss.pkl", "rb")
+dict_loss = pickle.load(file)
+file = open("lst_perc_loss_global_Classification.pkl", "rb")
+lst_loss = pickle.load(file)
+print(lst_loss)
