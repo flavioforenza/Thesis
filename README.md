@@ -70,3 +70,10 @@ La terza e ultima tecnica di compressione riguarda proprio quella proposta. Ques
 </p>
 
 I primi quattro step sono riassunti nella tabella in alto.
+Nello specifico, questi sono:
+1. **Modelli**: tutti i modelli riportati derivano dalla rete **MobileNet-V1** con iper-parametro α* variabile;
+2. **Allenamento**: i modelli Insegnante e Studnete base verranno allenati singolarmente su un totale di 1000 epoche;
+3. **Distillation**: preso il modello *Studente base*, si ricavano N modelli di *Studenti distillati (Dst)* ad una *Temperatura T* variabile;
+4. **Selezione**: viene scelto il miglior modello di Studente Distillato, ricavato da una temperatura T>1, avente le accuratezze comprese nel range delle accuratezze del modello Insegnante e Studente base. In questo caso, il modello ricavato da una tempertatua T=3 verrà selezionato. 
+
+*L'iper-parametro *width-multiplier α serve a gestire il numero di canali di input e di output in ogni layer convoluzionale del modello. Ad esempio, un modello ricavato con α=0.25 avrà una dimensione pari a 1/4 rispetto a un modello ricavato con un α=1.
