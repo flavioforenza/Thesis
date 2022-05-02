@@ -7,12 +7,12 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 
 ### Tabella dei contenuti
 * [Lavoro di tesi](#lavoro-di-tesi)
-* [Tecniche di Compressione/Ottimizzazione](#tecniche-di-compressione/ottimizzazione)
+* [Tecniche di Compressione e Ottimizzazione](#tecniche-di-compressione-e-ottimizzazione)
 * [Pruning](#pruning)
 * [Knowledge Distillation](#knowledge-distillation)
 * [Metodologia proposta](#metodologia-proposta)
 * [Modelli Insegnante e Studenti](#modelli-insegnante-e-studenti)
-* [Distilled Single Shot Detector (DSSD)](#distilled-single-shot-detector-dssd)
+* [Distilled Single Shot Detector DSSD](#distilled-single-shot-detector-dssd)
 
 
 ## Lavoro di tesi
