@@ -8,6 +8,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 ### Tabella dei contenuti
 * [Lavoro di tesi](#thesis-job)
 * [Tecniche di Compressione/Ottimizzazione](#techniques)
+* [Pruning](#pruning)
 
 
 
@@ -24,3 +25,8 @@ In letteratura esistono varie tecniche di compressione/ottimizzazione da poter a
 1. **Pruning** *(Potatura)*: Azzeramento di determinati parametri nella rete;
 2. **Knowledge Distillation** *(Conoscenza Distillata)*: Trasferimento della "Conoscenza" da un modello di grandi dimensioni, verso un modello più piccolo;
 3. **Metodologia Proposta**: combinazione della tecnica di Knowledge Distillation con l’iper-parametro `width-multiplier α` per la derivazione del modello proposto.
+
+## Pruning
+<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pruning%20no%20name.png">
+
+
