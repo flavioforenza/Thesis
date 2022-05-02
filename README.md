@@ -15,8 +15,8 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 
 Lo studio della tesi si è concentrato sulla ricerca e sull’implementazione di varie tecniche di compressione e, allo stesso tempo, di ottimizzazione, in grado di offrire supporto allo sviluppo di un nuovo modello di guida autonoma efficiente e ad alta velocità di inferenza.
 Quest’ultimo, deriva dallo studio di due modelli già noti allo stato dell’arte:
-Markup : 1. **MobileNet-V1**: specializzato nel task di Image classification;
-		 2. **Single-Shot-Detector (SSD)**: specializzato nel task di Object Detection.
+1. **MobileNet-V1**: specializzato nel task di Image classification;
+2. **Single-Shot-Detector (SSD)**: specializzato nel task di Object Detection.
 
 ## Tecniche di Compressione/Ottimizzazione
 
