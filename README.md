@@ -18,7 +18,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Risultati sperimentali Pruning](#risultati-sperimentali-pruning)
 * [Risultati sperimentali DSSD Dimensioni](#risultati-sperimentali-dssd-dimensioni)
 * [Risultati sperimentali DSSD Inferenza](#risultati-sperimentali-dssd-inferenza)
-
+* [Esempi visivi SSD Vs DSSD](#esempi-visivi-ssd-vs-dssd)
 
 ## Lavoro di tesi
 
@@ -138,7 +138,7 @@ Un comportamento simile si verifica sulle dimensioni dell'intero modello. Un dec
 
 ## Risultati sperimentali DSSD Inferenza
 
-Oltre alle dimensioni, è stata calcolata la velocità di inferenza, che generalmente si misura in *frames-per-seconds*, di entrambi i modelli.
+Oltre alle dimensioni, è stata calcolata la velocità di inferenza, che generalmente si misura in *frames-per-second*, di entrambi i modelli.
 Tutti i benchmarks hanno evidenziato un netto sorpasso delle performance derivanti dal modello prosposto rispetto al modello di partenza. Come si può notare, il miglioramento avviene su tutte le architetture utilizzate, maggiormente sulla Jetson Nano. 
 
 Tutti i test sono stati svolti utilizzando sia l'acceleratore TensorRT che il supporto delle librerie OpenCV (cuDNN) su entrambi i modelli.
@@ -146,3 +146,11 @@ Tutti i test sono stati svolti utilizzando sia l'acceleratore TensorRT che il su
 <p align="center">
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/total_speed.png">
 </p>
+
+## Esempi visivi SSD Vs DSSD
+
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/visual_example.png">
+</p>
+
+Dal punto di vista pratico, sottoponendo le stesse immagini ad entrambi i modelli, si può notare come il modello proposto DSSD riesca a generare delle probabilità di predizione che non si discostano tanto da quelle prodotte dal modello di partenza SSD. Stesso ed identico discorso per quanto riguarda la creazione e la forma dell bounding-boxes.
