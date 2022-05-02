@@ -20,4 +20,7 @@ Quest’ultimo, deriva dallo studio di due modelli già noti allo stato dell’a
 
 ## Tecniche di Compressione/Ottimizzazione
 
-
+In letteratura esistono varie tecniche di compressione/ottimizzazione da poter applicare sulle reti neurali profonde. In questo elaborato però, si è preferito optare verso l'utilizzo di tre tecniche, due delle quali ben conosciute allo stato dell'arte. Queste sono:
+1. **Pruning** *(Potatura)*: Azzeramento di determinati parametri nella rete;
+2. **Knowledge Distillation** *(Conoscenza Distillata)*: Trasferimento della "Conoscenza" da un modello di grandi dimensioni, verso un modello più piccolo;
+3. **Metodologia Proposta**: combinazione della tecnica di Knowledge Distillation con l’iper-parametro `width-multiplier α` per la derivazione del modello proposto.
