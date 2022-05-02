@@ -12,7 +12,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Knowledge Distillation](#KD)
 * [Metodologia proposta](#MP)
 * [Modelli Insegnante e Studenti](#TeacherStudent)
-
+* [Distilled-Single-Shot-Detector(DSSD)](#DSSD)
 
 
 ## Lavoro di tesi
@@ -66,7 +66,7 @@ La terza e ultima tecnica di compressione riguarda proprio quella proposta. Ques
 ## Modelli Insegnante e Studenti
 
 <p align="center">
-    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/table_KD.png", width="600"/>
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/table_KD.png", width="500"/>
 </p>
 
 I primi quattro step sono riassunti nella tabella in alto.
@@ -76,4 +76,13 @@ Nello specifico, questi sono:
 3. **Distillation**: preso il modello *Studente base*, si ricavano N modelli di *Studenti distillati (Dst)* ad una *Temperatura T* variabile;
 4. **Selezione**: viene scelto il miglior modello di Studente Distillato, ricavato da una temperatura T>1, avente le accuratezze comprese nel range delle accuratezze del modello Insegnante e Studente base. In questo caso, il modello ricavato da una tempertatua T=3 verrà selezionato. 
 
-*L'iper-parametro *width-multiplier α serve a gestire il numero di canali di input e di output in ogni layer convoluzionale del modello. Ad esempio, un modello ricavato con α=0.25 avrà una dimensione pari a 1/4 rispetto a un modello ricavato con un α=1.
+*L'iper-parametro *width-multiplier α* serve a gestire il numero di canali di input e di output in ogni layer convoluzionale del modello. Ad esempio, un modello ricavato con α=0.25 avrà una dimensione pari a 1/4 rispetto a un modello ricavato con un α=1.
+
+## Distilled-Single-Shot-Detector(DSSD)
+Dopo aver selezionato il modello di Studente Distillato, ricavato da una temperatura T=3, lo si va ad integrare, come rete *backbone*, all'interno dell'architettura di rete *Single-Shot-Detector (SSD)*. Tale integrazione, seguita da una modifica dei layer convoluzionali successivi, va a formare l'architettura del modello di rete proposto, che prenderà il nome di: **Distilled-Single-Shot-Detector(DSSD)** (Step 5).
+
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/SSD_architecture_freeze.png", width="500"/>
+</p>
+
+Dopo aver definito il modello proposto, segue l'applicazione di un ultimo processo (Step 6): il *Fine-Tuning*. Quest'ultimo si basa nell'eseguire un allenamento dell'intero modello andandone però a congelare i parametri della rete base (backbone), al fine di preservare la sua accuratezza.
