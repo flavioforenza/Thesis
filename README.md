@@ -16,6 +16,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Architetture di riferimento](#architetture-di-riferimento)
 * [Dataset](#dataset)
 * [Risultati sperimentali Pruning](#risultati-sperimentali-pruning)
+* [Risultati sperimentali DSSD Dimensioni](#risultati-sperimentali-dssd-dimensioni)
 
 
 ## Lavoro di tesi
@@ -123,3 +124,14 @@ Non avendo la possibilità di eliminarli, possiamo solamente applicare un'utilit
 <p align="center">
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pr2_results.png">
 </p>
+
+## Risultati sperimentali DSSD Dimensioni
+
+Per quanto riguarda il risultati sperimentali provenienti dal modello proposto, come possiamo notare dalla figura in basso, vi è una riduazione totale pari all'88.73% del numero dei parametri. Tale riduzione fa diminuire il numero dei parametri da circa 8 Milioni, sul modello di partenza SSD, a circa 1 Milione sul modello proposto.
+
+Un comportamento simile si verifica sulle dimensioni dell'intero modello. Un decremento pari all'88.60%, porta il modello ad assumere una dimensione pari a quasi 4 MB, rispetto ai 30.7 MB del modello di partenza SSD. 
+
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/dssd_results.png">
+</p>
+
