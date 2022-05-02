@@ -10,6 +10,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Tecniche di Compressione/Ottimizzazione](#techniques)
 * [Pruning](#pruning)
 * [Knowledge Distillation](#KD)
+* [Metodologia proposta](#MP)
 
 
 
@@ -50,6 +51,14 @@ La seconda tecnica di compressione, chiamata *Knowledge Distillation*, ha l'obie
 Per far ciò, la Knowledge Distillation si basa su tre elementi chiave:
 1. **Temperatura (T)**: iper-parametro legato al livello di generalità  presente all'interno del modello Studente;
 2. **Soft-Targets** probabilità derivanti dall'applicazione della *Temperatura* sui *logits* delle *Softmax* presenti in ognuno dei due modelli: <br />
-<img src="https://latex.codecogs.com/svg.image?q_j&space;=&space;\frac{e^{z_j/T}}{\sum_{k=1}^K&space;e^{z_k/T}}" title="https://latex.codecogs.com/svg.image?q_j = \frac{e^{z_j/T}}{\sum_{k=1}^K e^{z_k/T}}" />
+ ![](https://latex.codecogs.com/svg.image?q_j&space;=&space;\frac{e^{z_j/T}}{\sum_{k=1}^K&space;e^{z_k/T}})
 3. **Perdita complessiva**: formata dalla somma della perdita dell'Insegnante e dello Studente: <br />
 ![](https://latex.codecogs.com/svg.image?L=&space;L_{hard}&plus;T^2L_{soft})
+
+## Metodologia proposta.
+
+La terza e ultima tecnica di compressione riguarda proprio quella proposta. Questa si basa nell'esecuzione di sei differenti step al termine de quali si otterrà un modello utile per l'attività di *Object Detection* nella guida autonoma. 
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/steps_KD.png">
+</p>
+
