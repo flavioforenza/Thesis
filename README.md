@@ -19,6 +19,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Risultati sperimentali DSSD Dimensioni](#risultati-sperimentali-dssd-dimensioni)
 * [Risultati sperimentali DSSD Inferenza](#risultati-sperimentali-dssd-inferenza)
 * [Esempi visivi SSD Vs DSSD](#esempi-visivi-ssd-vs-dssd)
+* [Conclusioni e Sviluppi futuri](#conclusioni-e-sviluppi-futuri)
 
 ## Lavoro di tesi
 
@@ -154,3 +155,18 @@ Tutti i test sono stati svolti utilizzando sia l'acceleratore TensorRT che il su
 </p>
 
 Dal punto di vista pratico, sottoponendo le stesse immagini ad entrambi i modelli, si può notare come il modello proposto DSSD riesca a generare delle probabilità di predizione che non si discostano tanto da quelle prodotte dal modello di partenza SSD. Stesso ed identico discorso per quanto riguarda la creazione e la forma dell bounding-boxes.
+
+## Conclusioni e Sviluppi futuri
+Il seguente elaborato di tesi è incentrato nello sviluppo di una metodologia innovativa che ha permesso di:
+1. Combinare la tecnica di compressione **Knowledge Distillation** con **l’iper-parametro α** sulla rete **MobileNet-V1**;
+2. Integrare quest’ultima, come *rete base*, nel modello **Single-Shot-Detector (SSD)**;
+3. Derivare ed effettuare il *fine-tuning* del nuovo modello, nominato **"Distilled-Single-Shot-Detector (DSSD)"**, che è in grado di:
+    - Avere una bassa occupazione della memoria;
+    - Essere distribuito su sistemi a limitata capacità computazionale;
+    - Incrementare le performance rispetto al modello di partenza;
+    - Effettuare il task di object detection nella guida autonoma.
+
+Infine, come sviluppi futuri, sarebbe interessante:
+- Eseguire tale tecnica anche su modelli diversi;
+- Esntedere il concetto anche per il task di *Semantic Segmentation*;
+- Utilizzare una tecnica di compressione standard (es: *Pruning*), per ricavare il modello Studente nella tecnica di *Knowledge Distillation*.
