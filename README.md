@@ -22,7 +22,7 @@ Quest’ultimo, deriva dallo studio di due modelli già noti allo stato dell’a
 1. **MobileNet-V1**: specializzato nel task di Image classification;
 2. **Single-Shot-Detector (SSD)**: specializzato nel task di Object Detection.
 
-## Tecniche di Compressione/Ottimizzazione
+## Tecniche di Compressione e Ottimizzazione
 
 In letteratura esistono varie tecniche di compressione/ottimizzazione da poter applicare sulle reti neurali profonde. In questo elaborato però, si è preferito optare verso l'utilizzo di tre tecniche, due delle quali ben conosciute allo stato dell'arte. Queste sono:
 1. **Pruning** *(Potatura)*: Azzeramento di determinati parametri nella rete;
@@ -78,7 +78,7 @@ Nello specifico, questi sono:
 
 *L'iper-parametro *width-multiplier α* serve a gestire il numero di canali di input e di output in ogni layer convoluzionale del modello. Ad esempio, un modello ricavato con α=0.25 avrà una dimensione pari a 1/4 rispetto a un modello ricavato con un α=1.
 
-## Distilled-Single-Shot-Detector(DSSD)
+## Distilled-Single-Shot-Detector DSSD
 Dopo aver selezionato il modello di Studente Distillato, ricavato da una temperatura T=3, lo si va ad integrare, come rete *backbone*, all'interno dell'architettura di rete *Single-Shot-Detector (SSD)*. Tale integrazione, seguita da una modifica dei layer convoluzionali successivi, va a formare l'architettura del modello di rete proposto, che prenderà il nome di: **Distilled-Single-Shot-Detector(DSSD)** (Step 5).
 
 <p align="center">
