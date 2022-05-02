@@ -27,10 +27,14 @@ In letteratura esistono varie tecniche di compressione/ottimizzazione da poter a
 3. **Metodologia Proposta**: combinazione della tecnica di Knowledge Distillation con l’iper-parametro `width-multiplier α` per la derivazione del modello proposto.
 
 ## Pruning
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pruning%20no%20name.png">
+</p>
 
-<img align="center" src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pruning%20no%20name.png">
+All'interno della tecnica di *Pruning* viene definito un **indice di sparsità** utile a poter definire la quantità di paramentri da poter azzerare all'interno di un modello. In questo specifico caso, il modello sottoposto alla tecnica è il già citato modello *Single-Shot-Detector (SSD)*. Su quest'ultimo, vengono applicate tre tipologie di pruning, ognua agente su una specifica parte del modello:
+1. **Structured**: rimuove interi filtri (canali);
+2. **Unstructured**: rimuove i parametri (es: pesi e bias) in un layer;
+3. **Global-Unstructured**: rimuove i parametri su più layer.
 
-
-
-
+Teoricamente, dopo aver azzerato una o più tipologie di parametri, si procede alla loro rimozione per poter ridurre le dimensioni complessive del modello. Purtroppo, ad oggi, non esiste un framework in grado di eseguire questo step, e per framework si intende PyTorch e TensorFlow. 
 
