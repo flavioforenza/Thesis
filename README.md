@@ -17,6 +17,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Dataset](#dataset)
 * [Risultati sperimentali Pruning](#risultati-sperimentali-pruning)
 * [Risultati sperimentali DSSD Dimensioni](#risultati-sperimentali-dssd-dimensioni)
+* [Risultati sperimentali DSSD Inferenza](#risultati-sperimentali-dssd-inferenza)
 
 
 ## Lavoro di tesi
@@ -135,3 +136,13 @@ Un comportamento simile si verifica sulle dimensioni dell'intero modello. Un dec
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/dssd_results.png">
 </p>
 
+## Risultati sperimentali DSSD Inferenza
+
+Oltre alle dimensioni, è stata calcolata la velocità di inferenza, che generalmente si misura in *frames-per-seconds*, di entrambi i modelli.
+Tutti i benchmarks hanno evidenziato un netto sorpasso delle performance derivanti dal modello prosposto rispetto al modello di partenza. Come si può notare, il miglioramento avviene su tutte le architetture utilizzate, maggiormente sulla Jetson Nano. 
+
+Tutti i test sono stati svolti utilizzando sia l'acceleratore TensorRT che il supporto delle librerie OpenCV (cuDNN) su entrambi i modelli.
+
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/total_speed.png">
+</p>
