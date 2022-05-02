@@ -59,6 +59,6 @@ Per far ciò, la Knowledge Distillation si basa su tre elementi chiave:
 
 La terza e ultima tecnica di compressione riguarda proprio quella proposta. Questa si basa nell'esecuzione di sei differenti step al termine de quali si otterrà un modello utile per l'attività di *Object Detection* nella guida autonoma. 
 <p align="center">
-    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/steps_KD.png", width="200"/>
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/steps_KD.png", width="600"/>
 </p>
 
