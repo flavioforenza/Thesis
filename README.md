@@ -27,9 +27,10 @@ In letteratura esistono varie tecniche di compressione/ottimizzazione da poter a
 3. **Metodologia Proposta**: combinazione della tecnica di Knowledge Distillation con l’iper-parametro `width-multiplier α` per la derivazione del modello proposto.
 
 ## Pruning
-<p align="center">
-    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pruning%20no%20name.png">
-</p>
+
+<img align="center" src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pruning%20no%20name.png">
+
+
 
 
 
