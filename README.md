@@ -97,6 +97,6 @@ Nello specifico, queste sono tre, ovvero:
 2. **Google Colaboratory**
 3. **Macbook Pro**
 
-<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/jetson1.png", width="600"/>
+<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/jetson1.png">
 <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/colab_logo.png">
 <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/MacBook-Pro-16.png">
