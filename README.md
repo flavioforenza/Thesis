@@ -9,10 +9,10 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Lavoro di tesi](#thesis-job)
 * [Tecniche di Compressione/Ottimizzazione](#techniques)
 * [Pruning](#pruning)
-* [Knowledge Distillation](#KD)
-* [Metodologia proposta](#MP)
-* [Modelli Insegnante e Studenti](#TeacherStudent)
-* [Distilled-Single-Shot-Detector(DSSD)](#DSSD)
+* [Knowledge Distillation](#kd)
+* [Metodologia proposta](#mp)
+* [Modelli Insegnante e Studenti](#teacherstudent)
+* [Distilled-Single-Shot-Detector(DSSD)](#dssd)
 
 
 ## Lavoro di tesi
