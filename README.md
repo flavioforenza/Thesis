@@ -9,6 +9,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Lavoro di tesi](#thesis-job)
 * [Tecniche di Compressione/Ottimizzazione](#techniques)
 * [Pruning](#pruning)
+* [Knowledge Distillation](#KD)
 
 
 
@@ -27,14 +28,27 @@ In letteratura esistono varie tecniche di compressione/ottimizzazione da poter a
 3. **Metodologia Proposta**: combinazione della tecnica di Knowledge Distillation con l’iper-parametro `width-multiplier α` per la derivazione del modello proposto.
 
 ## Pruning
+
 <p align="center">
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pruning%20no%20name.png">
 </p>
 
-All'interno della tecnica di *Pruning* viene definito un **indice di sparsità** utile a poter definire la quantità di paramentri da poter azzerare all'interno di un modello. In questo specifico caso, il modello sottoposto alla tecnica è il già citato modello *Single-Shot-Detector (SSD)*. Su quest'ultimo, vengono applicate tre tipologie di pruning, ognua agente su una specifica parte del modello:
+Partendo dalla prima tecnica di compressione, all'interno della *Pruning* viene definito un **indice di sparsità** utile a poter definire la quantità di paramentri da poter azzerare all'interno di un modello. In questo specifico caso, il modello sottoposto alla tecnica è il già citato modello *Single-Shot-Detector (SSD)*. Su quest'ultimo, vengono applicate tre tipologie di pruning, ognua agente su una specifica parte del modello:
 1. **Structured**: rimuove interi filtri (canali);
 2. **Unstructured**: rimuove i parametri (es: pesi e bias) in un layer;
 3. **Global-Unstructured**: rimuove i parametri su più layer.
 
-Teoricamente, dopo aver azzerato una o più tipologie di parametri, si procede alla loro rimozione per poter ridurre le dimensioni complessive del modello. Purtroppo, ad oggi, non esiste un framework in grado di eseguire questo step, e per framework si intende PyTorch e TensorFlow. 
+Teoricamente, dopo aver azzerato una o più tipologie di parametri, si procede alla loro rimozione per poter ridurre le dimensioni complessive del modello. Purtroppo, ad oggi, non esiste un framework in grado di eseguire questo step, e per framework si intendono *PyTorch* e *TensorFlow*. 
 
+## Knowledge Distillation
+
+<p align="center">
+    <img src="https://https://github.com/flavioforenza/thesis_latex/blob/main/images/KD_losses.png">
+</p>
+
+La seconda tecnica di compressione, chiamata *Knowledge Distillation*, ha l'obiettivo di trasferire la *conoscenza distillata* da un modello di grandi dimensioni, chiamato *Insegnante*, verso un modello di piccole dimensioni chiamato *Studente*. 
+Per far ciò, la Knowledge Distillation si basa su tre elementi chiave:
+1. **Temperatura (T)**: iper-parametro legato al livello di generalità  presente all'interno del modello Studente;
+2. **Soft-Targets** probabilità derivanti dall'applicazione della *Temperatura* sui *logits* delle *Softmax* presenti in ognuno dei due modelli:
+$ q_j = \frac{e^{z_j/T}}{\sum_{k=1}^K e^{z_k/T}} $
+3. **Perdita complessiva**: formata dalla somma della perdita dell'Insegnante e dello Studente: $ L= L_{hard}+T^2L_{soft} $
