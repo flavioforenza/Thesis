@@ -13,6 +13,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Metodologia proposta](#metodologia-proposta)
 * [Modelli Insegnante e Studenti](#modelli-insegnante-e-studenti)
 * [Distilled Single Shot Detector DSSD](#distilled-single-shot-detector-dssd)
+* [Architetture di riferimento](#architetture-di-riferimento)
 
 
 ## Lavoro di tesi
@@ -79,6 +80,7 @@ Nello specifico, questi sono:
 *L'iper-parametro *width-multiplier α* serve a gestire il numero di canali di input e di output in ogni layer convoluzionale del modello. Ad esempio, un modello ricavato con α=0.25 avrà una dimensione pari a 1/4 rispetto a un modello ricavato con un α=1.
 
 ## Distilled-Single-Shot-Detector DSSD
+
 Dopo aver selezionato il modello di Studente Distillato, ricavato da una temperatura T=3, lo si va ad integrare, come rete *backbone*, all'interno dell'architettura di rete *Single-Shot-Detector (SSD)*. Tale integrazione, seguita da una modifica dei layer convoluzionali successivi, va a formare l'architettura del modello di rete proposto, che prenderà il nome di: **Distilled-Single-Shot-Detector(DSSD)** (Step 5).
 
 <p align="center">
@@ -86,3 +88,15 @@ Dopo aver selezionato il modello di Studente Distillato, ricavato da una tempera
 </p>
 
 Dopo aver definito il modello proposto, segue l'applicazione di un ultimo processo (Step 6): il *Fine-Tuning*. Quest'ultimo si basa nell'eseguire un allenamento dell'intero modello andandone però a congelare i parametri della rete base (backbone), al fine di preservare la sua accuratezza.
+
+## Architetture di riferimento
+
+Prima di passare ai risultati sperimentali, è bene illustrare quali sono state le architetture utilizzate nel seguente elaborato. 
+Nello specifico, queste sono tre, ovvero:
+1. **NVidia Jetson Nano**
+2. **Google Colaboratory**
+3. **Macbook Pro**
+
+<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/jetson1.png">
+<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/colab_logo.png">
+<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/MacBook-Pro-16.png">
