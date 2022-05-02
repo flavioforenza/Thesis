@@ -66,7 +66,7 @@ La terza e ultima tecnica di compressione riguarda proprio quella proposta. Ques
 ## Modelli Insegnante e Studenti
 
 <p align="center">
-    <img src=https://github.com/flavioforenza/thesis_latex/blob/main/images/table_KD.png, width="600"/>
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/table_KD.png", width="600"/>
 </p>
 
 I primi quattro step sono riassunti nella tabella in alto.
