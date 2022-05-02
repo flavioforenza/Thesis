@@ -11,6 +11,7 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Pruning](#pruning)
 * [Knowledge Distillation](#KD)
 * [Metodologia proposta](#MP)
+* [Modelli Insegnante e Studenti](#TeacherStudent)
 
 
 
@@ -62,3 +63,10 @@ La terza e ultima tecnica di compressione riguarda proprio quella proposta. Ques
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/steps_KD.png", width="600"/>
 </p>
 
+## Modelli Insegnante e Studenti
+
+<p align="center">
+    <img src=https://github.com/flavioforenza/thesis_latex/blob/main/images/table_KD.png, width="600"/>
+</p>
+
+I primi quattro step sono riassunti nella tabella in alto.
