@@ -14,6 +14,8 @@ La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con 
 * [Modelli Insegnante e Studenti](#modelli-insegnante-e-studenti)
 * [Distilled Single Shot Detector DSSD](#distilled-single-shot-detector-dssd)
 * [Architetture di riferimento](#architetture-di-riferimento)
+* [Dataset](#dataset)
+* [Risultati sperimentali Pruning](#risultati-sperimentali-pruning)
 
 
 ## Lavoro di tesi
@@ -99,4 +101,25 @@ Nello specifico, queste sono tre, ovvero:
 
 <p align="center">
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/arch_spec.png">
+</p>
+
+ Tutte le architetture sono differenti in termini di performance, dimensione e costo. È importante notare come la scheda embedded Jetson Nano abbia performance, dimensioni e costo inferiori rispetto alle altre due architetture.
+
+## Dataset
+
+Per quanto riguarda le immagini utilizzate per allenare il modello proposto, queste derivano tutte dal dataset [**Open-Images**](https://storage.googleapis.com/openimages/web/visualizer/index.html?set=train&type=segmentation&r=false&c=%2Fm%2F0k4j). Al suo interno troviamo immagini utili per addestrare un modello sia nell'atività di Object Detection che nell'attività di Semantic Segmentation. 
+Altri dataset, come Cityscapes, MS COCO e Pascal VOC, sono stati utilizzati per poter formare dei modelli pre-addestrati, risultati utili per poter creare un quadro globale sulle performance di ogni architettura.
+
+## Risultati sperimentali Pruning 
+
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pr_results.png">
+</p>
+
+Prendendo in riferimento i risultati derivanti dalla tecnica *Globale* di pruning, possiamo notare come fino al 60% di sparsità, la funzione di perdita resti costante. Superata tale soglia, la funzione di perdita iniza a degradare. Cosa sta a significare? Detto in altri termini, il 60% dei parametri azzerati, che in questo caso sono i pesi, sono del tutto inutili all'interno del modello. 
+
+Non avendo la possibilità di eliminarli, possiamo solamente applicare un'utility di compressione ("*gzip*" in questo caso), per poter ridurre le dimensioni del modello. Al 60% di sparsità, gzip riesce a ridurre le dimensioni del modello di circa il 54%, facendolo passare da 28.8 MB (0%) a circa 14.1 MB.
+
+<p align="center">
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/pr2_results.png">
 </p>
