@@ -99,6 +99,4 @@ Nello specifico, queste sono tre, ovvero:
 
 <p align="left">
     <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/jetson1.png", width="400"/>
-</p>
-<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/colab_logo.png">
-<img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/MacBook-Pro-16.png">
+</p> <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/colab_logo.png"> <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/MacBook-Pro-16.png">
