@@ -82,7 +82,7 @@ Nello specifico, questi sono:
 Dopo aver selezionato il modello di Studente Distillato, ricavato da una temperatura T=3, lo si va ad integrare, come rete *backbone*, all'interno dell'architettura di rete *Single-Shot-Detector (SSD)*. Tale integrazione, seguita da una modifica dei layer convoluzionali successivi, va a formare l'architettura del modello di rete proposto, che prenderà il nome di: **Distilled-Single-Shot-Detector(DSSD)** (Step 5).
 
 <p align="center">
-    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/SSD_architecture_freeze.png", width="500"/>
+    <img src="https://github.com/flavioforenza/thesis_latex/blob/main/images/SSD_architecture_freeze.png">
 </p>
 
 Dopo aver definito il modello proposto, segue l'applicazione di un ultimo processo (Step 6): il *Fine-Tuning*. Quest'ultimo si basa nell'eseguire un allenamento dell'intero modello andandone però a congelare i parametri della rete base (backbone), al fine di preservare la sua accuratezza.
