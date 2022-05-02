@@ -6,13 +6,13 @@ Ad essere le più colpite, sono le nuove auto elettriche che a bordo possiedono 
 La soluzione proposta da tale elaborato, mira a favorire il riuso di sitemi con risorse computazionali inferiori rispetto a quelli comunemente richiesti. 
 
 ### Tabella dei contenuti
-* [Lavoro di tesi](#thesis-job)
-* [Tecniche di Compressione/Ottimizzazione](#techniques)
+* [Lavoro di tesi](#lavoro-di-tesi)
+* [Tecniche di Compressione/Ottimizzazione](#tecniche-di-compressione/ottimizzazione)
 * [Pruning](#pruning)
-* [Knowledge Distillation](#kd)
-* [Metodologia proposta](#mp)
-* [Modelli Insegnante e Studenti](#teacherstudent)
-* [Distilled-Single-Shot-Detector(DSSD)](#dssd)
+* [Knowledge Distillation](#knowledge-distillation)
+* [Metodologia proposta](#metodologia-proposta)
+* [Modelli Insegnante e Studenti](#modelli-insegnante-e-studenti)
+* [Distilled-Single-Shot-Detector(DSSD)](#distilled-single-shot-detector(dssd))
 
 
 ## Lavoro di tesi
